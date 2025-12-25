@@ -83,8 +83,9 @@ export function AppNavigator() {
                     options={{
                         headerShown: true,
                         headerTitle: 'Profile',
+                        headerBackTitle: 'Back',
                         headerShadowVisible: false,
-                        headerStyle: { backgroundColor: '#F0F4F8' }, // Match screen background
+                        headerStyle: { backgroundColor: '#F0F4F8' },
                     }}
                 />
             </Stack.Navigator>

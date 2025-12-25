@@ -6,6 +6,7 @@ import { Card } from '../components/Card';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
 import { colors } from '../theme/colors';
+import { ProfileButton } from '../components/ProfileButton';
 
 const BADGES = [
     { id: '1', name: 'Early Bird', icon: Zap, color: '#F59E0B', description: 'Logged a win before 9AM' },
@@ -42,8 +43,13 @@ export function SmallWinsScreen() {
     return (
         <Screen>
             <View style={styles.header}>
-                <Text style={styles.title}>Small Wins</Text>
-                <Text style={styles.subtitle}>Celebrate every milestone.</Text>
+                <View style={styles.headerContent}>
+                    <View>
+                        <Text style={styles.title}>Small Wins</Text>
+                        <Text style={styles.subtitle}>Celebrate every milestone.</Text>
+                    </View>
+                    <ProfileButton />
+                </View>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -106,6 +112,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: layout.spacing.lg,
         paddingTop: layout.spacing.lg,
         paddingBottom: layout.spacing.md,
+    },
+    headerContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     title: {
         fontSize: typography.size.xxl,

@@ -9,7 +9,7 @@ import Animated, {
     Extrapolation,
     runOnJS,
 } from 'react-native-reanimated';
-import { MapPin, Briefcase } from 'lucide-react-native';
+import { MapPin } from 'lucide-react-native';
 import { Card } from './Card';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
@@ -69,7 +69,6 @@ export const SwipeCard = forwardRef<SwipeCardRef, TinderCardProps>(({ item, onSw
             [-10, 0, 10],
             Extrapolation.CLAMP
         );
-
         return {
             transform: [
                 { translateX: translateX.value },
@@ -157,7 +156,7 @@ export const SwipeCard = forwardRef<SwipeCardRef, TinderCardProps>(({ item, onSw
 const styles = StyleSheet.create({
     cardContainer: {
         width: '100%',
-        height: SCREEN_HEIGHT * 0.65, // Longer card
+        height: SCREEN_HEIGHT * 0.55,
         justifyContent: 'center',
         alignItems: 'center',
         padding: layout.spacing.lg,
@@ -165,8 +164,7 @@ const styles = StyleSheet.create({
     },
     card: {
         width: '100%',
-        height: '100%',
-        padding: layout.spacing.xl,
+        flex: 1,
     },
     content: {
         flex: 1,
@@ -188,7 +186,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 6,
     },
     detailText: {
         fontSize: typography.size.sm,
@@ -200,56 +198,54 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     tag: {
-        backgroundColor: colors.background,
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: colors.border,
     },
     tagText: {
-        fontSize: 12,
+        fontSize: typography.size.xs,
         color: colors.textSecondary,
-        fontWeight: '600',
+        fontWeight: typography.weight.medium as any,
     },
     divider: {
         height: 1,
-        backgroundColor: colors.borderDark,
+        backgroundColor: colors.border,
         opacity: 0.5,
-        marginVertical: 4,
+        marginVertical: layout.spacing.sm,
     },
     bio: {
         fontSize: typography.size.md,
-        color: colors.textPrimary,
-        lineHeight: 24,
+        color: colors.textSecondary,
+        lineHeight: 22,
     },
     stamp: {
         position: 'absolute',
-        top: 40,
-        zIndex: 10,
+        top: 30,
+        zIndex: 100,
         borderWidth: 4,
         borderRadius: 8,
-        padding: 8,
-        transform: [{ rotate: '-15deg' }],
+        padding: 10,
     },
     likeStamp: {
-        left: 40,
-        borderColor: '#4ADE80', // Green
+        right: 20,
+        borderColor: '#4ADE80',
         transform: [{ rotate: '-15deg' }],
     },
     nopeStamp: {
-        right: 40,
-        borderColor: '#EF4444', // Red
+        left: 20,
+        borderColor: '#EF4444',
         transform: [{ rotate: '15deg' }],
     },
     likeText: {
-        fontSize: 32,
+        fontSize: 24,
         fontWeight: 'bold',
         color: '#4ADE80',
         letterSpacing: 2,
     },
     nopeText: {
-        fontSize: 32,
+        fontSize: 24,
         fontWeight: 'bold',
         color: '#EF4444',
         letterSpacing: 2,

@@ -75,13 +75,10 @@ export function BuddyScreen() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Screen>
-                import {ProfileButton} from '../components/ProfileButton';
-
-                // ... (in component)
                 {/* Top Toggle Bar */}
                 <View style={styles.header}>
                     <View style={styles.headerContent}>
-                        <View style={{ width: 40 }} /> {/* Spacer to balance profile button */}
+                        <View style={{ width: 40 }} />
                         <View style={styles.toggleContainer}>
                             <TouchableOpacity
                                 style={[styles.toggleBtn, activeTab === 'buddy' && styles.activeToggle]}

@@ -7,6 +7,7 @@ import { Card } from '../components/Card';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
 import { colors } from '../theme/colors';
+import { ProfileButton } from '../components/ProfileButton';
 import { COMMUNITIES } from '../data/communityData';
 
 export function CommunityScreen() {
@@ -38,8 +39,13 @@ export function CommunityScreen() {
     return (
         <Screen>
             <View style={styles.header}>
-                <Text style={styles.title}>Communities</Text>
-                <Text style={styles.subtitle}>Find your safe space.</Text>
+                <View style={styles.headerContent}>
+                    <View>
+                        <Text style={styles.title}>Communities</Text>
+                        <Text style={styles.subtitle}>Find your safe space.</Text>
+                    </View>
+                    <ProfileButton />
+                </View>
             </View>
 
             <FlatList
@@ -58,6 +64,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: layout.spacing.lg,
         paddingTop: layout.spacing.lg,
         paddingBottom: layout.spacing.md,
+    },
+    headerContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     title: {
         fontSize: typography.size.xxl,
