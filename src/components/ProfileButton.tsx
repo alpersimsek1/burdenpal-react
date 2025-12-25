@@ -1,15 +1,15 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors } from '../theme/colors';
 
 export function ProfileButton() {
-    const navigation = useNavigation<any>();
+    const router = useRouter();
 
     return (
         <TouchableOpacity
             style={styles.container}
-            onPress={() => navigation.navigate('UserProfile')}
+            onPress={() => router.push('/user-profile')}
             activeOpacity={0.8}
         >
             <View style={styles.avatar}>

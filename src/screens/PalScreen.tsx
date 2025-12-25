@@ -1,23 +1,25 @@
-import React, { useState, useRef } from 'react';
+import { Calendar, Send } from 'lucide-react-native';
+import React, { useRef, useState } from 'react';
 import {
-    Text,
-    StyleSheet,
-    View,
-    TextInput,
+    FlatList,
     KeyboardAvoidingView,
     Platform,
-    TouchableOpacity,
     ScrollView,
-    FlatList
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import { Send, Calendar } from 'lucide-react-native';
-import { Screen } from '../components/Screen';
 import { Card } from '../components/Card';
+import { ProfileButton } from '../components/ProfileButton';
+import { Screen } from '../components/Screen';
+import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
-import { colors } from '../theme/colors';
-import { ProfileButton } from '../components/ProfileButton';
 
+// Native tab bar height constant (iOS native tabs are typically ~83pt + safe area)
+const TAB_BAR_HEIGHT = 100;
 // Generate dummy message history for past days
 const generateMessageHistory = () => {
     const history: { [key: string]: { messages: any[], summary: string } } = {};
@@ -334,6 +336,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: layout.spacing.xl,
+        paddingBottom: TAB_BAR_HEIGHT + layout.spacing.xl,
     },
     calendarTitle: {
         fontSize: typography.size.xl,
@@ -436,7 +439,7 @@ const styles = StyleSheet.create({
     },
     inputArea: {
         padding: layout.spacing.md,
-        paddingBottom: layout.spacing.sm,
+        paddingBottom: TAB_BAR_HEIGHT + layout.spacing.md,
     },
     inputWrapper: {
         flexDirection: 'row',
@@ -477,7 +480,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 12,
         padding: layout.spacing.md,
-        paddingBottom: layout.spacing.sm,
+        paddingBottom: TAB_BAR_HEIGHT + layout.spacing.md,
         backgroundColor: colors.background,
         borderTopWidth: 1,
         borderTopColor: colors.borderDark,
