@@ -1,6 +1,6 @@
 // Pal Screen - Industrial Minimalist AI Chat
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowUpRight, Calendar, X } from 'lucide-react-native';
+import { ArrowUpRight } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
     Dimensions,
@@ -14,7 +14,6 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { ProfileButton } from '../components/ProfileButton';
 import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 
@@ -56,9 +55,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export function PalScreen() {
     const [messages, setMessages] = useState(INITIAL_CHAT);
     const [inputText, setInputText] = useState('');
-    const [showCalendar, setShowCalendar] = useState(false);
     const flatListRef = useRef<FlatList>(null);
-    const calendarDays = useRef(getDaysInMonth()).current;
 
     const handleSendMessage = () => {
         if (!inputText.trim()) return;
@@ -127,39 +124,7 @@ export function PalScreen() {
             />
 
             <SafeAreaView style={styles.safeArea}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.calendarButton}
-                        onPress={() => setShowCalendar(!showCalendar)}
-                    >
-                        {showCalendar ? <X size={20} color={colors.textPrimary} /> : <Calendar size={20} color={colors.textPrimary} />}
-                    </TouchableOpacity>
-
-                    <View style={styles.headerTitleContainer}>
-                        <Text style={styles.headerSubtitle}>ASSISTANT /</Text>
-                        <Text style={styles.headerTitle}>PAL AI</Text>
-                    </View>
-
-                    <ProfileButton />
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Calendar Overlay */}
-                {showCalendar && (
-                    <View style={styles.calendarContainer}>
-                        <Text style={styles.calendarTitle}>MOOD HISTORY</Text>
-                        <FlatList
-                            data={calendarDays}
-                            renderItem={renderDot}
-                            keyExtractor={(item) => item.day.toString()}
-                            numColumns={7}
-                            contentContainerStyle={styles.calendarGrid}
-                            scrollEnabled={false}
-                        />
-                    </View>
-                )}
+                {/* Chat Area */}
 
                 {/* Chat Area */}
                 <KeyboardAvoidingView
