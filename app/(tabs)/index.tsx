@@ -306,42 +306,35 @@ export default function PalScreen() {
 
     const renderCirclesComingSoon = () => (
         <View style={styles.comingSoonContainer}>
-            <BlurView intensity={50} tint="light" style={styles.comingSoonCard}>
-                <View style={styles.comingSoonIconContainer}>
-                    <LinearGradient
-                        colors={[colors.accent, colors.moodGreat]}
-                        style={styles.comingSoonIconBg}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
-                        <Users size={48} color="#FFF" />
-                    </LinearGradient>
-                </View>
-                <Text style={styles.comingSoonTitle}>Circles</Text>
-                <Text style={styles.comingSoonSubtitle}>Coming Soon</Text>
-                <Text style={styles.comingSoonDescription}>
-                    Create and join group chats with like-minded people. Share experiences, get support, and grow together.
+            <View style={styles.heroBox}>
+                <Text style={styles.heroTitle}>COMING SOON</Text>
+                <Text style={styles.heroSubtitle}>
+                    FIND YOUR CIRCLE.{'\n'}
+                    CONNECT WITH LIKE-{'\n'}
+                    MINDED PEOPLE.
                 </Text>
+            </View>
 
-                <View style={styles.comingSoonFeatures}>
-                    <View style={styles.featureItem}>
-                        <Sparkles size={20} color={colors.accent} />
-                        <Text style={styles.featureText}>Create your own circles</Text>
-                    </View>
-                    <View style={styles.featureItem}>
-                        <Users size={20} color={colors.moodGreat} />
-                        <Text style={styles.featureText}>Join topic-based groups</Text>
-                    </View>
-                    <View style={styles.featureItem}>
-                        <Bell size={20} color={colors.warning} />
-                        <Text style={styles.featureText}>Get notified when it launches</Text>
-                    </View>
+            <View style={styles.infoBox}>
+                <Text style={styles.infoLabel}>FEATURE PREVIEW</Text>
+                <View style={styles.featureItem}>
+                    <Text style={styles.featureBullet}>01 /</Text>
+                    <Text style={styles.featureText}>SMART MATCHING ALGORITHM</Text>
                 </View>
+                <View style={styles.featureItem}>
+                    <Text style={styles.featureBullet}>02 /</Text>
+                    <Text style={styles.featureText}>SHARED INTERESTS & GOALS</Text>
+                </View>
+                <View style={styles.featureItem}>
+                    <Text style={styles.featureBullet}>03 /</Text>
+                    <Text style={styles.featureText}>SAFE & SUPPORTIVE SPACE</Text>
+                </View>
+            </View>
 
-                <TouchableOpacity style={styles.notifyButton}>
-                    <Text style={styles.notifyButtonText}>Notify Me</Text>
-                </TouchableOpacity>
-            </BlurView>
+            <TouchableOpacity style={styles.notifyButton} activeOpacity={0.8}>
+                <Bell size={20} color={colors.textPrimary} style={{ marginRight: 10 }} />
+                <Text style={styles.notifyButtonText}>NOTIFY ME WHEN READY</Text>
+            </TouchableOpacity>
         </View>
     );
 
@@ -937,74 +930,70 @@ const styles = StyleSheet.create({
     comingSoonContainer: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: layout.spacing.lg,
+        paddingHorizontal: layout.spacing.xl,
         paddingBottom: TAB_BAR_HEIGHT,
+        gap: 40,
     },
-    comingSoonCard: {
-        width: '100%',
-        borderRadius: layout.borderRadius.lg,
-        padding: layout.spacing.xl,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.glassBorder,
-        overflow: 'hidden',
+    heroBox: {
+        gap: 16,
     },
-    comingSoonIconContainer: {
-        marginBottom: layout.spacing.lg,
-    },
-    comingSoonIconBg: {
-        width: 96,
-        height: 96,
-        borderRadius: 48,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    comingSoonTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
+    heroTitle: {
+        fontSize: 42,
+        fontWeight: '900',
         color: colors.textPrimary,
-        marginBottom: 4,
+        letterSpacing: -1,
     },
-    comingSoonSubtitle: {
-        fontSize: typography.size.md,
-        fontWeight: '600',
-        color: colors.accent,
-        marginBottom: layout.spacing.md,
-    },
-    comingSoonDescription: {
-        fontSize: typography.size.md,
+    heroSubtitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
         color: colors.textSecondary,
-        textAlign: 'center',
-        lineHeight: 22,
-        marginBottom: layout.spacing.lg,
+        lineHeight: 28,
+        letterSpacing: 0.5,
     },
-    comingSoonFeatures: {
-        width: '100%',
-        gap: 12,
-        marginBottom: layout.spacing.lg,
+    infoBox: {
+        gap: 16,
+        padding: 24,
+        borderWidth: 1,
+        borderColor: colors.borderDark,
+        backgroundColor: 'rgba(255,255,255,0.3)',
+    },
+    infoLabel: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: colors.textSecondary,
+        marginBottom: 8,
+        letterSpacing: 1,
     },
     featureItem: {
         flexDirection: 'row',
-        alignItems: 'center',
         gap: 12,
-        backgroundColor: colors.glassOverlay,
-        padding: 12,
-        borderRadius: layout.borderRadius.md,
+        alignItems: 'center',
+    },
+    featureBullet: {
+        fontSize: 14,
+        fontFamily: 'Courier',
+        color: colors.textSecondary,
+        fontWeight: 'bold',
     },
     featureText: {
-        fontSize: typography.size.md,
+        fontSize: 14,
+        fontWeight: 'bold',
         color: colors.textPrimary,
+        letterSpacing: 0.5,
     },
     notifyButton: {
-        backgroundColor: colors.textPrimary,
-        paddingHorizontal: 32,
-        paddingVertical: 14,
-        borderRadius: layout.borderRadius.xl,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 56,
+        borderWidth: 1,
+        borderColor: colors.textPrimary,
+        backgroundColor: colors.surfaceWarm,
     },
     notifyButtonText: {
-        fontSize: typography.size.md,
-        fontWeight: '600',
-        color: '#FFF',
+        fontSize: 14,
+        fontWeight: '900',
+        color: colors.textPrimary,
+        letterSpacing: 1,
     },
 });
