@@ -1,7 +1,9 @@
+// Pal Screen - Industrial Minimalist AI Chat
 import { LinearGradient } from 'expo-linear-gradient';
-import { Calendar, Send, X } from 'lucide-react-native';
+import { ArrowUpRight, Calendar, X } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
+    Dimensions,
     FlatList,
     KeyboardAvoidingView,
     Platform,
@@ -43,11 +45,13 @@ const INITIAL_CHAT = [
     {
         id: '1',
         sender: 'ai',
-        text: 'Hello! I\'m your Pal AI. How are you feeling today?',
-        time: '9:00 AM',
+        text: 'Hello. I am Pal. How can I assist you today?',
+        time: '09:00',
         type: 'text'
     }
 ];
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export function PalScreen() {
     const [messages, setMessages] = useState(INITIAL_CHAT);
@@ -63,7 +67,7 @@ export function PalScreen() {
             id: Date.now().toString(),
             sender: 'user',
             text: inputText.trim(),
-            time: 'Now',
+            time: 'NOW',
             type: 'text'
         };
 
@@ -74,8 +78,8 @@ export function PalScreen() {
             const aiMsg = {
                 id: (Date.now() + 1).toString(),
                 sender: 'ai',
-                text: 'I hear you. Tell me more about that.',
-                time: 'Now',
+                text: 'Processed. I understand you feel that way. Tell me more.',
+                time: 'NOW',
                 type: 'text'
             };
             setMessages(prev => [...prev, aiMsg]);
@@ -84,28 +88,14 @@ export function PalScreen() {
 
     const renderMessage = ({ item }: { item: any }) => {
         const isUser = item.sender === 'user';
-        const isAi = item.sender === 'ai';
 
         return (
-            <View style={[
-                styles.messageRow,
-                isUser ? styles.userRow : styles.aiRow
-            ]}>
-                <View style={[
-                    styles.messageContent,
-                    isUser ? styles.userContent : styles.aiContent
-                ]}>
-                    <Text style={[
-                        styles.messageText,
-                        isUser ? styles.userText : styles.aiText
-                    ]}>
+            <View style={[styles.messageRow, isUser ? styles.userRow : styles.aiRow]}>
+                <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
+                    <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.aiMessageText]}>
                         {item.text}
                     </Text>
-
-                    <Text style={[
-                        styles.timeText,
-                        isUser ? styles.userTime : styles.aiTime
-                    ]}>
+                    <Text style={[styles.timeText, isUser ? styles.userTime : styles.aiTime]}>
                         {item.time}
                     </Text>
                 </View>
@@ -117,265 +107,170 @@ export function PalScreen() {
         <View style={styles.dotWrapper}>
             <View style={[
                 styles.dot,
-                { backgroundColor: item.hasData ? item.mood.color : 'rgba(0,0,0,0.05)' },
-                item.isToday && styles.dotToday
+                {
+                    backgroundColor: item.hasData ? item.mood.color : 'transparent',
+                    borderColor: item.hasData ? 'transparent' : colors.borderDark
+                }
             ]} />
         </View>
     );
 
     return (
-        <LinearGradient
-            colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
-            style={styles.container}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-        >
-            {/* Header */}
+        <View style={styles.container}>
+            {/* Abstract Gradient Blob */}
+            <LinearGradient
+                colors={[colors.moodSupport, 'transparent']}
+                style={styles.abstractBlob}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                locations={[0, 0.4]}
+            />
+
             <SafeAreaView style={styles.safeArea}>
+                {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity
-                        style={styles.headerButton}
+                        style={styles.calendarButton}
                         onPress={() => setShowCalendar(!showCalendar)}
                     >
-                        <Calendar size={24} color={colors.textPrimary} />
+                        {showCalendar ? <X size={20} color={colors.textPrimary} /> : <Calendar size={20} color={colors.textPrimary} />}
                     </TouchableOpacity>
 
-                    <View style={{ flex: 1 }} />
+                    <View style={styles.headerTitleContainer}>
+                        <Text style={styles.headerSubtitle}>ASSISTANT /</Text>
+                        <Text style={styles.headerTitle}>PAL AI</Text>
+                    </View>
 
                     <ProfileButton />
                 </View>
-            </SafeAreaView>
 
-            {/* Calendar / Dot Matrix Overlay (Blended) */}
-            {showCalendar && (
-                <View style={styles.calendarOverlay}>
-                    {/* Minimal header for close button if needed, or keeping it subtle */}
-                    <View style={styles.calendarHeader}>
-                        <Text style={styles.calendarTitle}>Your Mood History</Text>
-                        <TouchableOpacity onPress={() => setShowCalendar(false)}>
-                            {/* Close icon somewhat blended or dark */}
-                            <X size={24} color={colors.textSecondary} />
-                        </TouchableOpacity>
+                <View style={styles.divider} />
+
+                {/* Calendar Overlay */}
+                {showCalendar && (
+                    <View style={styles.calendarContainer}>
+                        <Text style={styles.calendarTitle}>MOOD HISTORY</Text>
+                        <FlatList
+                            data={calendarDays}
+                            renderItem={renderDot}
+                            keyExtractor={(item) => item.day.toString()}
+                            numColumns={7}
+                            contentContainerStyle={styles.calendarGrid}
+                            scrollEnabled={false}
+                        />
                     </View>
+                )}
 
-                    {/* The grid itself */}
+                {/* Chat Area */}
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1 }}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+                >
                     <FlatList
-                        data={calendarDays}
-                        renderItem={renderDot}
-                        keyExtractor={(_, i) => i.toString()}
-                        numColumns={7}
-                        contentContainerStyle={styles.dotsGrid}
-                        scrollEnabled={false}
+                        ref={flatListRef}
+                        data={messages}
+                        renderItem={renderMessage}
+                        keyExtractor={item => item.id}
+                        contentContainerStyle={styles.chatContent}
+                        showsVerticalScrollIndicator={false}
+                        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
                     />
 
-                    <View style={styles.calendarStats}>
-                        <Text style={styles.statsText}>You've been tracking for 12 days straight!</Text>
-                    </View>
-                </View>
-            )}
-
-            {/* Chat Area */}
-            <FlatList
-                ref={flatListRef}
-                data={messages}
-                renderItem={renderMessage}
-                keyExtractor={item => item.id}
-                contentContainerStyle={styles.chatList}
-                showsVerticalScrollIndicator={false}
-            />
-
-            {/* Float Input Area */}
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-            >
-                <View style={styles.inputContainer}>
-                    {/* Input Wrapper */}
-                    <View style={styles.inputWrapper}>
-                        {/* Removed Plus Button */}
-                        <TouchableOpacity style={styles.plusButtonPlaceholder}>
-                            <Text style={{ fontSize: 24, color: colors.textSecondary }}>+</Text>
-                        </TouchableOpacity>
-
+                    {/* Input Area */}
+                    <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Type a message..."
-                            placeholderTextColor={colors.textLight}
+                            placeholder="MESSAGE PAL..."
+                            placeholderTextColor={colors.textSecondary}
                             value={inputText}
                             onChangeText={setInputText}
                             multiline
                         />
-
-                        <TouchableOpacity
-                            style={styles.sendButtonInternal}
-                            onPress={handleSendMessage}
-                        >
-                            <Send size={18} color="#FFFFFF" />
+                        <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
+                            <ArrowUpRight size={24} color={colors.textPrimary} />
                         </TouchableOpacity>
                     </View>
-                </View>
-            </KeyboardAvoidingView>
-        </LinearGradient>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     safeArea: {
-        zIndex: 10,
+        flex: 1,
+    },
+    abstractBlob: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: 300,
+        height: 300,
+        opacity: 0.1,
     },
     header: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: layout.spacing.lg,
-        paddingVertical: layout.spacing.md,
-    },
-    headerButton: {
-        width: 44,
-        height: 44,
-        justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 22,
-        backgroundColor: '#FFFFFF',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        paddingHorizontal: layout.spacing.xl,
+        paddingTop: layout.spacing.lg,
+        paddingBottom: layout.spacing.lg,
     },
-    chatList: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingTop: layout.spacing.md,
-        paddingBottom: 140,
+    headerTitleContainer: {
+        alignItems: 'center',
+        gap: 2,
     },
-    messageRow: {
-        flexDirection: 'row',
-        marginBottom: 20,
+    headerSubtitle: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: colors.textSecondary,
+        letterSpacing: 1,
     },
-    userRow: {
-        justifyContent: 'flex-end',
-    },
-    aiRow: {
-        justifyContent: 'flex-start',
-    },
-    messageContent: {
-        maxWidth: '80%',
-        borderRadius: 20,
-        padding: 16,
-    },
-    userContent: {
-        backgroundColor: colors.primary,
-        borderTopRightRadius: 4,
-    },
-    aiContent: {
-        backgroundColor: '#FFFFFF',
-        borderTopLeftRadius: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 5,
-        elevation: 2,
-    },
-    messageText: {
-        fontSize: 16,
-        lineHeight: 24,
-    },
-    userText: {
-        color: '#FFFFFF',
-    },
-    aiText: {
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: '900',
         color: colors.textPrimary,
+        letterSpacing: -0.5,
     },
-    timeText: {
-        fontSize: 11,
-        marginTop: 6,
-        alignSelf: 'flex-end',
-    },
-    userTime: {
-        color: 'rgba(255,255,255,0.7)',
-    },
-    aiTime: {
-        color: colors.textLight,
-    },
-    // Input Styles
-    inputContainer: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingTop: 10,
-        backgroundColor: 'transparent',
-        paddingBottom: 110,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 30,
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        minHeight: 50,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5,
-    },
-    plusButtonPlaceholder: {
+    calendarButton: {
         width: 40,
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        // Keeping the placeholder space/icon but user asked to remove "the plus button"
-        // I'll adhere to "remove the plus button" from the text but keep the visual balance or just remove it fully?
-        // "remove the plus button from the input" -> I should remove it DOM-wise.
-        display: 'none',
+        borderWidth: 1,
+        borderColor: colors.borderDark,
     },
-    input: {
-        flex: 1,
-        fontSize: 16,
-        color: colors.textPrimary,
-        height: '100%',
-        marginLeft: 16, // Added margin since plus button is gone
-        paddingTop: 0,
-        paddingBottom: 0,
-    },
-    sendButtonInternal: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 8,
-    },
-    // Calendar Styles
-    calendarOverlay: {
-        marginTop: 20,
+    divider: {
+        height: 1,
+        backgroundColor: colors.textPrimary,
         marginHorizontal: layout.spacing.lg,
-        // No background color = blended
-        paddingBottom: 20,
     },
-    calendarHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
+
+    // Calendar
+    calendarContainer: {
+        padding: layout.spacing.xl,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderDark,
+        backgroundColor: 'rgba(255,255,255,0.5)',
     },
     calendarTitle: {
-        fontSize: 18,
+        fontSize: 12,
         fontWeight: 'bold',
-        color: colors.textPrimary,
+        color: colors.textSecondary,
+        marginBottom: 16,
+        letterSpacing: 1,
     },
-    dotsGrid: {
+    calendarGrid: {
         alignItems: 'center',
     },
     dotWrapper: {
-        width: 40, // Wider spacing
+        width: (SCREEN_WIDTH - 60) / 7,
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
@@ -384,21 +279,86 @@ const styles = StyleSheet.create({
         width: 12,
         height: 12,
         borderRadius: 6,
+        borderWidth: 1,
     },
-    dotToday: {
-        borderWidth: 2,
-        borderColor: colors.textPrimary,
-        width: 16,
-        height: 16,
-        borderRadius: 8,
+
+    // Chat
+    chatContent: {
+        padding: layout.spacing.xl,
+        paddingBottom: 20,
+        gap: 24,
     },
-    calendarStats: {
-        marginTop: 10,
+    messageRow: {
+        flexDirection: 'row',
+        gap: 12,
+        alignItems: 'flex-end',
+    },
+    userRow: {
+        justifyContent: 'flex-end',
+    },
+    aiRow: {
+        justifyContent: 'flex-start',
+    },
+    messageBubble: {
+        maxWidth: '80%',
+        padding: 16,
+        borderRadius: 24, // Rounded
+    },
+    userBubble: {
+        backgroundColor: colors.primary,
+        borderBottomRightRadius: 4, // Subtle tail effect or keep rounded? User said "make cards rounded". I'll keep a small tell.
+    },
+    aiBubble: {
+        backgroundColor: colors.surface, // Solid white background
+    },
+    messageText: {
+        fontSize: 16,
+        lineHeight: 24,
+    },
+    userMessageText: {
+        color: '#FFF',
+    },
+    aiMessageText: {
+        color: colors.textPrimary,
+    },
+    timeText: {
+        fontSize: 10,
+        fontFamily: 'Courier',
+        marginTop: 8,
+        alignSelf: 'flex-end',
+        opacity: 0.7,
+    },
+    userTime: {
+        color: '#FFF',
+    },
+    aiTime: {
+        color: colors.textPrimary,
+    },
+
+    // Input
+    inputContainer: {
+        flexDirection: 'row',
+        padding: layout.spacing.lg,
+        borderTopWidth: 2,
+        borderTopColor: colors.textPrimary,
+        backgroundColor: colors.background,
+    },
+    input: {
+        flex: 1,
+        fontSize: 16,
+        fontFamily: 'Courier',
+        color: colors.textPrimary,
+        maxHeight: 100,
+        paddingTop: 14,
+    },
+    sendButton: {
+        width: 50,
+        height: 50,
+        justifyContent: 'center',
         alignItems: 'center',
-    },
-    statsText: {
-        color: colors.textSecondary,
-        fontWeight: '600',
-        fontSize: 14,
-    },
+        backgroundColor: colors.surfaceWarm,
+        borderWidth: 1,
+        borderColor: colors.textPrimary,
+        marginLeft: 12,
+    }
 });
