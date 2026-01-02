@@ -154,7 +154,7 @@ export function PalScreen() {
                             multiline
                         />
                         <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-                            <ArrowUpRight size={24} color={colors.textPrimary} />
+                            <ArrowUpRight size={24} color="#FFF" />
                         </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
@@ -303,27 +303,45 @@ const styles = StyleSheet.create({
     // Input
     inputContainer: {
         flexDirection: 'row',
-        padding: layout.spacing.lg,
-        borderTopWidth: 2,
-        borderTopColor: colors.textPrimary,
+        paddingHorizontal: layout.spacing.md,
+        paddingVertical: 12,
         backgroundColor: colors.background,
+        alignItems: 'flex-end', // Align bottom for multiline growth
     },
     input: {
         flex: 1,
         fontSize: 16,
-        fontFamily: 'Courier',
+        fontFamily: 'System', // Use system font for input, cleaner
         color: colors.textPrimary,
+        backgroundColor: colors.surface,
+        borderRadius: 24,
+        paddingHorizontal: 16,
+        paddingTop: 12, // Center text vertically
+        paddingBottom: 12,
         maxHeight: 100,
-        paddingTop: 14,
+        borderWidth: 1,
+        borderColor: colors.border,
+        // iOS Shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        // Android Shadow
+        elevation: 1,
     },
     sendButton: {
-        width: 50,
-        height: 50,
+        width: 48,
+        height: 48,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.surfaceWarm,
-        borderWidth: 1,
-        borderColor: colors.textPrimary,
+        backgroundColor: colors.primary,
+        borderRadius: 24,
         marginLeft: 12,
+        // Shadow
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
     }
 });

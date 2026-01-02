@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Bell, Layers, MessageCircle, Sparkles, User, Users } from 'lucide-react-native';
+import { Bell, CalendarX, Handshake, Layers, MessageCircle, Sparkles, User, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -36,7 +36,6 @@ const MOCK_PALS = [
         rating: 4.8,
         feelings: [
             { keyword: 'Lost.', description: "Don't know which way to go" },
-            { keyword: 'Stuck.', description: "I feel stuck" },
             { keyword: 'Stuck.', description: "I feel stuck" }
         ],
         bio: "I feel like I'm standing at a crossroads in the fog.",
@@ -173,7 +172,7 @@ const RECENT_CHATS = [
 ];
 
 // Tab types
-type TabType = 'pal' | 'mentor' | 'circles';
+type TabType = 'pal' | 'circles';
 
 // Swipeable Pal Card Component
 function SwipeablePalCard({
@@ -326,6 +325,20 @@ function SwipeablePalCard({
                                 </View>
                             ))}
                         </View>
+
+                        {/* Action Buttons Row */}
+                        <View style={styles.actionButtonsRow}>
+                            <TouchableOpacity style={[styles.actionButton, styles.nopeButton]} onPress={() => handleButtonSwipeLeft()}>
+                                <CalendarX size={32} color="#FFF" />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.actionButton, styles.likeButton]} onPress={() => {
+                                translateX.value = withTiming(SCREEN_WIDTH * 1.5, { duration: 250 }, () => {
+                                    runOnJS(onSwipeRight)();
+                                });
+                            }}>
+                                <Handshake size={32} color="#FFF" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                 </View>
@@ -361,7 +374,6 @@ export default function PalScreen() {
     const getTabTitle = () => {
         switch (activeTab) {
             case 'pal': return 'Pal';
-            case 'mentor': return 'Mentor';
             case 'circles': return 'Circles';
         }
     };
@@ -402,12 +414,35 @@ export default function PalScreen() {
 
     const renderNoMoreCards = () => (
         <View style={styles.noMoreCardsContainer}>
-            <BlurView intensity={50} tint="light" style={styles.noMoreCardsCard}>
-                <Text style={styles.noMoreCardsEmoji}>🎉</Text>
-                <Text style={styles.noMoreCardsTitle}>You've seen everyone!</Text>
+            <Image
+                source={require('../../assets/backgrounds/bg_pal.png')}
+                style={StyleSheet.absoluteFillObject}
+                resizeMode="cover"
+                blurRadius={20}
+            />
+            <View style={styles.noMoreCardsContent}>
+                <View style={styles.emptyStateIconContainer}>
+                    <Users size={64} color={colors.textSecondary} />
+                </View>
+                <Text style={styles.noMoreCardsTitle}>That's everyone for now</Text>
                 <Text style={styles.noMoreCardsSubtitle}>
-                    Check back later for new pals
+                    You've seen all the suggested pals for today. Come back tomorrow for more meaningful connections.
                 </Text>
+
+                <View style={styles.divider} />
+
+                <TouchableOpacity style={styles.premiumButton} activeOpacity={0.9}>
+                    <LinearGradient
+                        colors={['#D4AF37', '#FFD700', '#D4AF37']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.premiumGradient}
+                    >
+                        <Sparkles size={20} color="#FFF" style={{ marginRight: 8 }} />
+                        <Text style={styles.premiumButtonText}>UNLOCK UNLIMITED SWIPES</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                     style={styles.resetButton}
                     onPress={() => {
@@ -415,9 +450,9 @@ export default function PalScreen() {
                         setRejectedPals([]);
                     }}
                 >
-                    <Text style={styles.resetButtonText}>Start Over</Text>
+                    <Text style={styles.resetButtonText}>Review skipped profiles</Text>
                 </TouchableOpacity>
-            </BlurView>
+            </View>
         </View>
     );
 
@@ -482,34 +517,8 @@ export default function PalScreen() {
                         );
                     }
 
-                    // Background cards are static
-                    return (
-                        <View
-                            key={pal.id}
-                            style={[
-                                styles.backgroundCard,
-                                {
-                                    transform: [
-                                        { scale },
-                                        { translateY },
-                                    ],
-                                    zIndex: -index,
-                                }
-                            ]}
-                        >
-                            <LinearGradient
-                                colors={(pal as any).gradient || ['#4c669f', '#3b5998', '#192f6a']}
-                                style={styles.palCardBackground}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                            >
-                                <View style={styles.backgroundCardGradient}>
-                                    <Text style={styles.moodPreTitle}>CURRENTLY FEELING</Text>
-                                    <Text style={styles.moodTitle}>{(pal as any).feelings[0].keyword}</Text>
-                                </View>
-                            </LinearGradient>
-                        </View>
-                    );
+                    // Background cards are hidden
+                    return null;
                 }).reverse()}
             </View>
         );
@@ -576,16 +585,7 @@ export default function PalScreen() {
                                     <User size={20} color={colors.textSecondary} />
                                 )}
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.tabButton, activeTab === 'mentor' && styles.activeTabButton]}
-                                onPress={() => setActiveTab('mentor')}
-                            >
-                                {activeTab === 'mentor' ? (
-                                    <Text style={styles.activeTabText}>Mentor</Text>
-                                ) : (
-                                    <Sparkles size={20} color={colors.textSecondary} />
-                                )}
-                            </TouchableOpacity>
+
                             <TouchableOpacity
                                 style={[styles.tabButton, activeTab === 'circles' && styles.activeTabButton]}
                                 onPress={() => setActiveTab('circles')}
@@ -1055,18 +1055,8 @@ const styles = StyleSheet.create({
         color: colors.textPrimary,
         letterSpacing: 1,
     },
+
     // Enhanced Swipe Card Styles
-    cardContentCentered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: layout.spacing.lg,
-    },
-    moodSection: {
-        width: '100%',
-        alignItems: 'center',
-        gap: 16,
-    },
     feelingsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -1152,6 +1142,29 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         maxWidth: 120,
     },
+    // Action Buttons
+    actionButtonsRow: {
+        flexDirection: 'row',
+        justifyContent: 'center', // Center items
+        gap: 24, // Closer together
+        marginTop: 20,
+    },
+    actionButton: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.3)',
+    },
+    nopeButton: {
+        backgroundColor: 'rgba(0,0,0,0.2)',
+    },
+    likeButton: {
+        backgroundColor: 'rgba(255,255,255,0.2)',
+    },
+
     // --- NEW CARD DESIGN STYLES ---
     cardImagePlaceholder: {
         height: '45%',
@@ -1175,9 +1188,10 @@ const styles = StyleSheet.create({
     cardContentNew: {
         flex: 1,
         paddingHorizontal: layout.spacing.xl,
-        paddingTop: 120, // Add padding for top header
-        paddingBottom: 100, // Add padding for bottom navbar
-        justifyContent: 'space-between',
+        paddingTop: 40, // Reduced from 120 to move content closer to image
+        paddingBottom: 100, // Keep bottom padding for safety
+        justifyContent: 'flex-start', // Change to flex-start to control spacing
+        gap: 20, // Add gap between elements
     },
     cardHeaderRow: {
         flexDirection: 'row',
@@ -1247,6 +1261,50 @@ const styles = StyleSheet.create({
     pillTagText: {
         fontSize: 11,
         fontWeight: '700',
+        color: '#FFF',
+        letterSpacing: 1,
+    },
+    noMoreCardsContent: {
+        width: '100%',
+        alignItems: 'center',
+        padding: 32,
+    },
+    emptyStateIconContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    divider: {
+        width: '100%',
+        height: 1,
+        backgroundColor: colors.border,
+        marginBottom: 32,
+    },
+    premiumButton: {
+        width: '100%',
+        height: 56,
+        borderRadius: 28,
+        overflow: 'hidden',
+        marginBottom: 16,
+        shadowColor: '#D4AF37',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    premiumGradient: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    premiumButtonText: {
+        fontSize: 14,
+        fontWeight: 'bold',
         color: '#FFF',
         letterSpacing: 1,
     },
