@@ -22,28 +22,19 @@ export default function RootLayout() {
                 <Stack.Screen
                     name="chat-detail"
                     options={{
-                        headerShown: true,
-                        headerTitle: 'Chat',
-                        headerBackTitle: 'Back',
-                        headerShadowVisible: false,
+                        headerShown: false,
                     }}
                 />
                 <Stack.Screen
                     name="post-detail"
                     options={{
-                        headerShown: true,
-                        headerTitle: 'Post',
-                        headerBackTitle: 'Back',
-                        headerShadowVisible: false,
+                        headerShown: false,
                     }}
                 />
                 <Stack.Screen
                     name="topic-feed"
                     options={{
-                        headerShown: true,
-                        headerTitle: 'Topic',
-                        headerBackTitle: 'Back',
-                        headerShadowVisible: false,
+                        headerShown: false,
                     }}
                 />
             </Stack>

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ChevronRight, MessageSquare, Sparkles, Users } from 'lucide-react-native';
 import React from 'react';
-import { Dimensions, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ProfileButton } from '../../src/components/ProfileButton';
 import { COMMUNITIES, POSTS } from '../../src/data/communityData';
 import { colors } from '../../src/theme/colors';
@@ -42,7 +42,12 @@ export default function SpacesTab() {
     };
 
     return (
-        <ImageBackground source={BG_SPACES} style={styles.container} resizeMode="cover">
+        <LinearGradient
+            colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
+            style={styles.container}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+        >
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerContent}>
@@ -133,7 +138,7 @@ export default function SpacesTab() {
                     </TouchableOpacity>
                 </BlurView>
             </ScrollView>
-        </ImageBackground>
+        </LinearGradient>
     );
 }
 

@@ -1,8 +1,10 @@
 // Post Detail Screen for expo-router
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowBigUp, MessageSquare, Send } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ArrowBigUp, ArrowLeft, MessageSquare, MoreHorizontal, Send } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { colors } from '../src/theme/colors';
 import { layout } from '../src/theme/layout';
 import { typography } from '../src/theme/typography';
@@ -33,97 +35,163 @@ export default function PostDetailScreen() {
     const [reply, setReply] = useState('');
 
     return (
-        <View style={styles.container}>
-            <Stack.Screen options={{ title: 'Post' }} />
-
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
-            >
-                <ScrollView contentContainerStyle={styles.content}>
-                    {/* Main Post */}
-                    <View style={styles.postContainer}>
-                        <View style={styles.postMeta}>
-                            <View style={[styles.communityDot, { backgroundColor: communityColor || colors.accent }]} />
-                            <Text style={styles.communityName}>{post.community}</Text>
-                            <Text style={styles.metaText}>• Posted by {post.author} • {post.time}</Text>
-                        </View>
-
-                        <Text style={styles.postTitle}>{post.title}</Text>
-                        <Text style={styles.postBody}>{post.body}</Text>
-
-                        <View style={styles.actionsRow}>
-                            <View style={styles.actionItem}>
-                                <ArrowBigUp size={20} color={colors.textSecondary} />
-                                <Text style={styles.actionCount}>{post.upvotes}</Text>
-                            </View>
-                            <View style={styles.actionItem}>
-                                <MessageSquare size={18} color={colors.textSecondary} />
-                                <Text style={styles.actionCount}>{post.comments} Comments</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.separator} />
-
-                    {/* Comments Section */}
-                    <Text style={styles.commentsHeader}>Comments</Text>
-
-                    {COMMENTS.map((comment) => (
-                        <View key={comment.id} style={styles.commentContainer}>
-                            <View style={styles.commentHeader}>
-                                <Text style={styles.commentAuthor}>{comment.author}</Text>
-                                <Text style={styles.commentTime}>• {comment.time}</Text>
-                            </View>
-                            <Text style={styles.commentBody}>{comment.body}</Text>
-                            <View style={styles.commentActions}>
-                                <ArrowBigUp size={16} color={colors.textSecondary} />
-                                <Text style={styles.commentLikes}>{comment.likes}</Text>
-                                <Text style={styles.replyLink}>Reply</Text>
-                            </View>
-                        </View>
-                    ))}
-                </ScrollView>
-
-                {/* Reply Input */}
-                <View style={styles.inputBar}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Add a comment..."
-                        placeholderTextColor={colors.textLight}
-                        value={reply}
-                        onChangeText={setReply}
-                    />
-                    <TouchableOpacity
-                        style={[styles.sendButton, { opacity: reply.trim().length > 0 ? 1 : 0.5 }]}
-                        disabled={reply.trim().length === 0}
-                    >
-                        <Send size={18} color={colors.textSecondary} />
+        <LinearGradient
+            colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
+            style={styles.container}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+        >
+            <SafeAreaView style={styles.safeArea}>
+                {/* Custom Header */}
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <ArrowLeft size={24} color={colors.textPrimary} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Post</Text>
+                    <TouchableOpacity style={styles.menuButton}>
+                        <MoreHorizontal size={24} color={colors.textPrimary} />
                     </TouchableOpacity>
                 </View>
-            </KeyboardAvoidingView>
-        </View>
+
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1 }}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+                >
+                    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                        {/* Main Post Card */}
+                        <BlurView intensity={40} tint="light" style={styles.postCard}>
+                            <View style={styles.postMeta}>
+                                <View style={[styles.communityDot, { backgroundColor: communityColor || colors.accent }]} />
+                                <Text style={styles.communityName}>{post.community}</Text>
+                                <Text style={styles.metaText}>• {post.time}</Text>
+                            </View>
+
+                            <View style={styles.authorInfo}>
+                                <View style={[styles.avatarPlaceholder, { backgroundColor: communityColor || colors.accent }]}>
+                                    <Text style={styles.avatarInitial}>{post.author?.charAt(0).toUpperCase()}</Text>
+                                </View>
+                                <Text style={styles.authorName}>{post.author}</Text>
+                            </View>
+
+                            <Text style={styles.postTitle}>{post.title}</Text>
+                            <Text style={styles.postBody}>{post.body}</Text>
+
+                            <View style={styles.actionsRow}>
+                                <View style={styles.actionItem}>
+                                    <ArrowBigUp size={20} color={colors.textSecondary} />
+                                    <Text style={styles.actionCount}>{post.upvotes}</Text>
+                                </View>
+                                <View style={styles.actionItem}>
+                                    <MessageSquare size={18} color={colors.textSecondary} />
+                                    <Text style={styles.actionCount}>{post.comments} Comments</Text>
+                                </View>
+                            </View>
+                        </BlurView>
+
+                        {/* Comments Label */}
+                        <Text style={styles.sectionLabel}>Discussion</Text>
+
+                        {/* Comments List */}
+                        {COMMENTS.map((comment) => (
+                            <View key={comment.id} style={styles.commentCard}>
+                                <View style={styles.commentHeader}>
+                                    <Text style={styles.commentAuthor}>{comment.author}</Text>
+                                    <Text style={styles.commentTime}>• {comment.time}</Text>
+                                </View>
+                                <Text style={styles.commentBody}>{comment.body}</Text>
+                                <View style={styles.commentActions}>
+                                    <TouchableOpacity style={styles.actionItem}>
+                                        <ArrowBigUp size={16} color={colors.textSecondary} />
+                                        <Text style={styles.commentLikes}>{comment.likes}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity>
+                                        <Text style={styles.replyLink}>Reply</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ))}
+                    </ScrollView>
+
+                    {/* Input Bar */}
+                    <BlurView intensity={80} tint="light" style={styles.inputContainer}>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Add to the discussion..."
+                                placeholderTextColor={colors.textSecondary}
+                                value={reply}
+                                onChangeText={setReply}
+                                multiline
+                            />
+                            <TouchableOpacity
+                                style={[styles.sendButton, { opacity: reply.trim().length > 0 ? 1 : 0.5 }]}
+                                disabled={reply.trim().length === 0}
+                            >
+                                <LinearGradient
+                                    colors={[colors.accent, colors.moodProgress]}
+                                    style={styles.sendButtonGradient}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                >
+                                    <Send size={18} color="#FFF" />
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </BlurView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+    },
+    safeArea: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: layout.spacing.lg,
+        paddingVertical: layout.spacing.md,
+    },
+    headerTitle: {
+        fontSize: typography.size.lg,
+        fontWeight: 'bold',
+        color: colors.textPrimary,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+    },
+    menuButton: {
+        width: 40,
+        height: 40,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
     },
     content: {
-        paddingBottom: layout.spacing.xl,
+        paddingHorizontal: 0, // Full width
+        paddingBottom: 100, // Space for input
+        paddingTop: 10,
     },
-    postContainer: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingVertical: layout.spacing.lg,
+    // Main Post
+    // Main Post
+    postCard: {
+        padding: layout.spacing.lg,
+        width: '100%',
+        backgroundColor: 'transparent',
     },
+    // ... (rest of styles)
     postMeta: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: layout.spacing.sm,
-        flexWrap: 'wrap',
+        marginBottom: 12,
     },
     communityDot: {
         width: 8,
@@ -132,20 +200,43 @@ const styles = StyleSheet.create({
         marginRight: 6,
     },
     communityName: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: 'bold',
         color: colors.textPrimary,
     },
     metaText: {
-        fontSize: 13,
+        fontSize: 12,
         color: colors.textSecondary,
         marginLeft: 4,
+    },
+    authorInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: layout.spacing.md,
+        gap: 8,
+    },
+    avatarPlaceholder: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarInitial: {
+        color: '#FFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    authorName: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.textPrimary,
     },
     postTitle: {
         fontSize: typography.size.xl,
         fontWeight: 'bold',
         color: colors.textPrimary,
-        marginBottom: layout.spacing.sm,
+        marginBottom: 8,
         lineHeight: 28,
     },
     postBody: {
@@ -157,6 +248,12 @@ const styles = StyleSheet.create({
     actionsRow: {
         flexDirection: 'row',
         gap: 20,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+        paddingBottom: 12,
+        borderBottomWidth: 1, // Separator
+        borderBottomColor: colors.border,
     },
     actionItem: {
         flexDirection: 'row',
@@ -167,80 +264,98 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.textSecondary,
     },
-    separator: {
-        height: 1,
-        backgroundColor: colors.borderDark,
-    },
-    commentsHeader: {
+    sectionLabel: {
         fontSize: typography.size.md,
         fontWeight: 'bold',
         color: colors.textPrimary,
-        paddingHorizontal: layout.spacing.lg,
-        paddingVertical: layout.spacing.md,
+        marginBottom: layout.spacing.md,
+        marginLeft: layout.spacing.lg,
+        marginTop: layout.spacing.md,
     },
-    commentContainer: {
+    // Comments
+    commentCard: {
         paddingHorizontal: layout.spacing.lg,
         paddingVertical: layout.spacing.md,
+        backgroundColor: 'transparent',
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderDark,
+        borderBottomColor: colors.border,
     },
     commentHeader: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4,
+        justifyContent: 'space-between',
+        marginBottom: 6,
     },
     commentAuthor: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: 'bold',
         color: colors.textPrimary,
     },
     commentTime: {
-        fontSize: 13,
+        fontSize: 12,
         color: colors.textSecondary,
-        marginLeft: 6,
     },
     commentBody: {
-        fontSize: typography.size.md,
+        fontSize: 14,
         color: colors.textPrimary,
-        lineHeight: 22,
-        marginBottom: layout.spacing.sm,
+        lineHeight: 20,
+        marginBottom: 8,
     },
     commentActions: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 16,
     },
     commentLikes: {
-        fontSize: 13,
+        fontSize: 12,
         color: colors.textSecondary,
     },
     replyLink: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '600',
         color: colors.textSecondary,
-        marginLeft: 8,
     },
-    inputBar: {
+    // Input
+    inputContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: layout.spacing.lg,
+        paddingTop: 12,
+        paddingBottom: Platform.OS === 'ios' ? 40 : 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.glassBorder,
+    },
+    inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: layout.spacing.lg,
-        paddingVertical: layout.spacing.md,
-        paddingBottom: Platform.OS === 'ios' ? 40 : layout.spacing.md,
-        borderTopWidth: 1,
-        borderTopColor: colors.borderDark,
-        backgroundColor: colors.background,
-        gap: 12,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 24,
+        paddingHorizontal: 8,
+        paddingVertical: 8,
+        minHeight: 48,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
     },
     input: {
         flex: 1,
-        fontSize: typography.size.md,
+        fontSize: 15,
         color: colors.textPrimary,
-        paddingVertical: 8,
+        paddingHorizontal: 10,
+        paddingTop: 0,
+        paddingBottom: 0,
+        maxHeight: 100,
     },
     sendButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        marginLeft: 8,
+    },
+    sendButtonGradient: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
     },

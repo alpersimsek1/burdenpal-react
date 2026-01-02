@@ -483,7 +483,12 @@ export default function PalScreen() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <ImageBackground source={BG_PAL} style={styles.container} resizeMode="cover">
+            <LinearGradient
+                colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
+                style={styles.container}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+            >
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.headerContent}>
@@ -546,7 +551,7 @@ export default function PalScreen() {
 
                 {/* Content */}
                 {renderCardContent()}
-            </ImageBackground>
+            </LinearGradient>
         </GestureHandlerRootView>
     );
 }

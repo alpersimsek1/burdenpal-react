@@ -1,6 +1,7 @@
 import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import React from 'react';
 import { DynamicColorIOS, Platform } from 'react-native';
+import { colors } from '../../src/theme/colors';
 
 /**
  * iOS 26 Liquid Glass Tab Bar Layout
@@ -9,14 +10,14 @@ import { DynamicColorIOS, Platform } from 'react-native';
  * SF Symbols are used for iOS icons, which automatically adapt to the liquid glass styling.
  */
 export default function TabLayout() {
-    // Dynamic color for liquid glass - warm cream tones for modern look
+    // Dynamic color for liquid glass - Blueish tones for modern look
     const dynamicTintColor = Platform.OS === 'ios'
-        ? DynamicColorIOS({ dark: '#FAF7F4', light: '#D4A574' })
-        : '#D4A574';
+        ? DynamicColorIOS({ dark: '#F0F5F9', light: colors.primary })
+        : colors.primary;
 
     const dynamicLabelColor = Platform.OS === 'ios'
-        ? DynamicColorIOS({ dark: '#FAF7F4', light: '#2D2A26' })
-        : '#2D2A26';
+        ? DynamicColorIOS({ dark: '#F0F5F9', light: colors.primary })
+        : colors.primary;
 
     return (
         <NativeTabs

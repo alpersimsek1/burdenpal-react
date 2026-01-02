@@ -1,35 +1,63 @@
 // Chat Detail Screen for expo-router
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Send } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Screen } from '../src/components/Screen';
+import React, { useRef, useState } from 'react';
+import {
+    FlatList,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import { colors } from '../src/theme/colors';
 import { layout } from '../src/theme/layout';
 import { typography } from '../src/theme/typography';
 
+const BG_PAL = require('../assets/backgrounds/bg_pal.png');
+
+// Avatar mapping
+const AVATARS: { [key: string]: any } = {
+    '1': require('../assets/avatars/female1.png'),
+    '2': require('../assets/avatars/male1.png'),
+    '3': require('../assets/avatars/female2.png'),
+    '4': require('../assets/avatars/male2.png'),
+};
+
 // Mock messages for different users
 const CHAT_HISTORY: { [key: string]: any[] } = {
-    '1': [ // James
-        { id: 'm1', sender: 'them', text: 'Hey! Did you finish the task?', time: '10:30 AM' },
-        { id: 'm2', sender: 'me', text: 'Almost! Just wrapping up the documentation.', time: '10:32 AM' },
-        { id: 'm3', sender: 'them', text: "Awesome, let me know when it's done.", time: '10:33 AM' },
+    '1': [ // Sarah Chen
+        { id: 'm1', sender: 'them', text: 'Hey! How are you feeling today? 😊', time: '10:30 AM' },
+        { id: 'm2', sender: 'me', text: 'I\'m doing much better! Thanks for checking in.', time: '10:32 AM' },
+        { id: 'm3', sender: 'them', text: 'That\'s great to hear! Remember, I\'m always here if you need to talk.', time: '10:33 AM' },
+        { id: 'm4', sender: 'me', text: 'I really appreciate that. It means a lot to have someone who listens.', time: '10:35 AM' },
+        { id: 'm5', sender: 'them', text: 'Of course! That sounds like a great idea! Let me know how it goes. 💪', time: '10:36 AM' },
     ],
-    '2': [ // Mia
+    '2': [ // Marcus Johnson
         { id: 'm1', sender: 'me', text: 'Thanks for the advice yesterday!', time: 'Yesterday' },
-        { id: 'm2', sender: 'them', text: 'No problem at all! Happy to help.', time: 'Yesterday' },
+        { id: 'm2', sender: 'them', text: 'No problem at all! Happy to help. How did it go?', time: 'Yesterday' },
+        { id: 'm3', sender: 'me', text: 'It went really well. I feel more confident now.', time: 'Yesterday' },
+        { id: 'm4', sender: 'them', text: 'Thanks for sharing that with me. I really appreciate it. 🙏', time: '1h ago' },
     ],
-    '3': [ // Lucas
-        { id: 'm1', sender: 'them', text: "Let's sync tomorrow.", time: '3h ago' },
+    '3': [ // Emma Williams
+        { id: 'm1', sender: 'them', text: 'How are you feeling today? ☀️', time: '3h ago' },
     ]
 };
 
 export default function ChatDetailScreen() {
     const router = useRouter();
     const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
+    const flatListRef = useRef<FlatList>(null);
 
     const [messages, setMessages] = useState(CHAT_HISTORY[id || '1'] || []);
     const [inputText, setInputText] = useState('');
+
+    const avatar = AVATARS[id || '1'] || AVATARS['1'];
 
     const sendMessage = () => {
         if (!inputText.trim()) return;
@@ -43,24 +71,37 @@ export default function ChatDetailScreen() {
 
         setMessages([...messages, newMessage]);
         setInputText('');
+
+        // Scroll to bottom after sending
+        setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
     };
 
-    const renderMessage = ({ item }: { item: any }) => {
+    const renderMessage = ({ item, index }: { item: any; index: number }) => {
         const isMe = item.sender === 'me';
+        const showAvatar = !isMe && (index === 0 || messages[index - 1]?.sender === 'me');
+
         return (
             <View style={[
                 styles.messageRow,
                 isMe ? styles.myMessageRow : styles.theirMessageRow
             ]}>
                 {!isMe && (
-                    <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>{name?.[0] || '?'}</Text>
+                    <View style={styles.avatarSpace}>
+                        {showAvatar && (
+                            <Image source={avatar} style={styles.messageAvatar} />
+                        )}
                     </View>
                 )}
-                <View style={[
-                    styles.messageBubble,
-                    isMe ? styles.myBubble : styles.theirBubble
-                ]}>
+                <BlurView
+                    intensity={isMe ? 0 : 50}
+                    tint="light"
+                    style={[
+                        styles.messageBubble,
+                        isMe ? styles.myBubble : styles.theirBubble
+                    ]}
+                >
                     <Text style={[
                         styles.messageText,
                         isMe ? styles.myMessageText : styles.theirMessageText
@@ -69,40 +110,49 @@ export default function ChatDetailScreen() {
                         styles.timeText,
                         isMe ? styles.myTimeText : styles.theirTimeText
                     ]}>{item.time}</Text>
-                </View>
+                </BlurView>
             </View>
         );
     };
 
     return (
-        <Screen>
-            <View style={styles.header}>
+        <LinearGradient
+            colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
+            style={styles.container}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+        >
+            {/* Header */}
+            <BlurView intensity={60} tint="light" style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <ArrowLeft size={24} color={colors.textPrimary} />
+                    <ArrowLeft size={22} color={colors.textPrimary} />
                 </TouchableOpacity>
-                <View style={styles.headerTitleContainer}>
-                    <View style={styles.headerAvatar}>
-                        <Text style={styles.headerAvatarText}>{name?.[0] || '?'}</Text>
-                    </View>
+
+                <View style={styles.headerCenter}>
+                    <Image source={avatar} style={styles.headerAvatar} />
                     <Text style={styles.headerTitle}>{name}</Text>
                 </View>
-                <View style={{ width: 24 }} />
-            </View>
+
+                {/* Spacer to balance the header */}
+                <View style={{ width: 40 }} />
+            </BlurView>
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.container}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
             >
                 <FlatList
+                    ref={flatListRef}
                     data={messages}
                     renderItem={renderMessage}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.chatList}
                     showsVerticalScrollIndicator={false}
+                    onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                 />
 
-                <View style={styles.inputArea}>
+                <BlurView intensity={80} tint="light" style={styles.inputArea}>
                     <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
@@ -117,47 +167,56 @@ export default function ChatDetailScreen() {
                             disabled={inputText.trim().length === 0}
                             onPress={sendMessage}
                         >
-                            <Send color={colors.surface} size={18} />
+                            <LinearGradient
+                                colors={[colors.accent, colors.moodProgress]}
+                                style={styles.sendButtonGradient}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                            >
+                                <Send size={20} color="#FFF" />
+                            </LinearGradient>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </BlurView>
             </KeyboardAvoidingView>
-        </Screen>
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: layout.spacing.lg,
-        paddingTop: layout.spacing.sm,
+        paddingTop: 60,
         paddingBottom: layout.spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderDark,
-        backgroundColor: colors.background + '90',
+        borderBottomColor: colors.glassBorder,
+        overflow: 'hidden',
     },
     backButton: {
-        padding: 4,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: colors.glass,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    headerTitleContainer: {
+    headerCenter: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
     },
     headerAvatar: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: colors.primaryLight,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    headerAvatarText: {
-        fontSize: typography.size.sm,
-        fontWeight: 'bold',
-        color: colors.primary,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        borderWidth: 2,
+        borderColor: colors.glassBorder,
     },
     headerTitle: {
         fontSize: typography.size.lg,
@@ -168,13 +227,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: layout.spacing.lg,
         paddingTop: layout.spacing.md,
         paddingBottom: layout.spacing.xl,
-        gap: layout.spacing.sm,
     },
     messageRow: {
         flexDirection: 'row',
         alignItems: 'flex-end',
         marginBottom: 8,
-        gap: 8,
     },
     myMessageRow: {
         justifyContent: 'flex-end',
@@ -182,88 +239,86 @@ const styles = StyleSheet.create({
     theirMessageRow: {
         justifyContent: 'flex-start',
     },
-    avatar: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: colors.primaryLight,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 4,
+    avatarSpace: {
+        width: 36,
+        marginRight: 8,
     },
-    avatarText: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        color: colors.primary,
+    messageAvatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
     },
     messageBubble: {
         maxWidth: '75%',
-        padding: 12,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: 'transparent',
+        padding: 14,
+        borderRadius: 20,
+        overflow: 'hidden',
     },
     myBubble: {
-        backgroundColor: colors.primary,
-        borderBottomRightRadius: 4,
+        backgroundColor: colors.textPrimary,
+        borderBottomRightRadius: 6,
     },
     theirBubble: {
-        backgroundColor: colors.surface,
-        borderColor: colors.borderDark,
-        borderBottomLeftRadius: 4,
+        backgroundColor: colors.glass,
+        borderBottomLeftRadius: 6,
+        borderWidth: 1,
+        borderColor: colors.glassBorder,
     },
     messageText: {
         fontSize: typography.size.md,
-        lineHeight: 20,
+        lineHeight: 22,
     },
     myMessageText: {
-        color: colors.surface,
+        color: '#FFFFFF',
     },
     theirMessageText: {
         color: colors.textPrimary,
     },
     timeText: {
         fontSize: 10,
-        marginTop: 4,
+        marginTop: 6,
         alignSelf: 'flex-end',
     },
     myTimeText: {
-        color: colors.surface + '90',
+        color: 'rgba(255,255,255,0.7)',
     },
     theirTimeText: {
         color: colors.textSecondary,
     },
     inputArea: {
         padding: layout.spacing.md,
-        backgroundColor: colors.background,
+        paddingBottom: layout.spacing.xl,
         borderTopWidth: 1,
-        borderTopColor: colors.borderDark,
+        borderTopColor: colors.glassBorder,
+        overflow: 'hidden',
     },
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.surface,
+        backgroundColor: colors.glass,
         borderRadius: layout.borderRadius.xl,
-        paddingHorizontal: layout.spacing.md,
-        paddingVertical: 8,
+        paddingLeft: layout.spacing.md,
+        paddingRight: 6,
+        paddingVertical: 6,
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: colors.glassBorder,
     },
     input: {
         flex: 1,
         fontSize: typography.size.md,
         color: colors.textPrimary,
         maxHeight: 100,
-        paddingTop: 4,
-        paddingBottom: 4,
+        paddingTop: 8,
+        paddingBottom: 8,
     },
     sendButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: colors.primary,
+        marginLeft: layout.spacing.sm,
+    },
+    sendButtonGradient: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: layout.spacing.sm,
     },
 });
