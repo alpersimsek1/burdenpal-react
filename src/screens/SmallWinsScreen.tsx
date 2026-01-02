@@ -1,18 +1,17 @@
-import { BlurView } from 'expo-blur';
+// Small Wins Screen - Industrial Minimalist Design
 import { LinearGradient } from 'expo-linear-gradient';
-import { Award, CheckCircle2, Medal, Plus, Star, TrendingUp, Trophy, Zap } from 'lucide-react-native';
+import { ArrowUpRight, Award, CheckCircle2, Medal, Plus, Star, TrendingUp, Trophy, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ProfileButton } from '../components/ProfileButton';
 import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
-import { typography } from '../theme/typography';
 
 const TAB_BAR_HEIGHT = 100;
 
 const BADGES = [
     { id: '1', name: 'Early Bird', icon: Zap, color: colors.warning, description: 'Logged a win before 9AM' },
-    { id: '2', name: 'Streak', icon: TrendingUp, color: colors.success, description: '3 wins in a row' },
+    { id: '2', name: 'Streak 3', icon: TrendingUp, color: colors.success, description: '3 wins in a row' },
     { id: '3', name: 'Supporter', icon: Star, color: colors.accent, description: 'Cheered for 10 friends' },
     { id: '4', name: 'Resilient', icon: Medal, color: colors.error, description: 'Came back after a break' },
     { id: '5', name: 'Achiever', icon: Trophy, color: colors.moodGreat, description: '50 total wins' },
@@ -20,11 +19,11 @@ const BADGES = [
 ];
 
 const INITIAL_WINS = [
-    { id: '1', title: 'Made my bed', date: 'Today, 8:00 AM' },
-    { id: '2', title: 'Drank 2L of water', date: 'Today, 2:00 PM' },
-    { id: '3', title: 'Sent that scary email', date: 'Yesterday' },
-    { id: '4', title: 'Walked for 15 mins', date: 'Yesterday' },
-    { id: '5', title: 'Cooked a real dinner', date: '2 days ago' },
+    { id: '1', title: 'Made my bed', date: 'TODAY, 8:00 AM' },
+    { id: '2', title: 'Drank 2L of water', date: 'TODAY, 2:00 PM' },
+    { id: '3', title: 'Sent that scary email', date: 'YESTERDAY' },
+    { id: '4', title: 'Walked for 15 mins', date: 'YESTERDAY' },
+    { id: '5', title: 'Cooked a real dinner', date: '2 DAYS AGO' },
 ];
 
 export function SmallWinsScreen() {
@@ -36,7 +35,7 @@ export function SmallWinsScreen() {
         const win = {
             id: Date.now().toString(),
             title: newWin,
-            date: 'Just now',
+            date: 'JUST NOW',
         };
         setWins([win, ...wins]);
         setNewWin('');
@@ -44,74 +43,92 @@ export function SmallWinsScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Abstract Gradient Blob */}
             <LinearGradient
-                colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
-                style={styles.gradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-            >
+                colors={[colors.moodCelebration, 'transparent']}
+                style={styles.abstractBlob}
+                start={{ x: 1, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                locations={[0, 0.6]}
+            />
+
+            <SafeAreaView style={styles.safeArea}>
                 <View style={styles.header}>
-                    <View style={styles.headerContent}>
-                        <View>
-                            <Text style={styles.title}>Small Wins</Text>
-                            <Text style={styles.subtitle}>Celebrate every milestone.</Text>
-                        </View>
-                        <ProfileButton />
+                    <View style={styles.headerTitleContainer}>
+                        <Text style={styles.headerSubtitle}>MILESTONES /</Text>
+                        <Text style={styles.headerTitle}>SMALL WINS</Text>
                     </View>
+                    <ProfileButton />
                 </View>
 
+                <View style={styles.divider} />
+
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+
+                    {/* Input Section - Industrial Box */}
+                    <View style={styles.inputSection}>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="WHAT DID YOU ACHIEVE?"
+                                placeholderTextColor={colors.textSecondary}
+                                value={newWin}
+                                onChangeText={setNewWin}
+                            />
+                            <TouchableOpacity style={styles.addButton} onPress={handleAddWin}>
+                                <Plus size={24} color={colors.textPrimary} />
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={styles.inputHint}>CELEBRATE EVERY STEP.</Text>
+                    </View>
+
+                    {/* Divider */}
+                    <View style={styles.sectionDivider} />
+
                     {/* Badges Section */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Your Badges</Text>
+                        <View style={styles.sectionHeaderRow}>
+                            <Text style={styles.sectionTitle}>BADGES</Text>
+                            <ArrowUpRight size={16} color={colors.textSecondary} />
+                        </View>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgesScroll}>
                             {BADGES.map((badge) => (
                                 <View key={badge.id} style={styles.badgeContainer}>
-                                    <BlurView intensity={40} tint="light" style={[styles.badgeCircle, { borderColor: badge.color }]}>
+                                    <View style={[styles.badgeCircle, { borderColor: badge.color }]}>
+                                        <View style={[styles.badgeFill, { backgroundColor: badge.color, opacity: 0.1 }]} />
                                         <badge.icon size={24} color={badge.color} />
-                                    </BlurView>
-                                    <Text style={styles.badgeName}>{badge.name}</Text>
+                                    </View>
+                                    <Text style={styles.badgeName}>{badge.name.toUpperCase()}</Text>
                                 </View>
                             ))}
                         </ScrollView>
                     </View>
 
-                    {/* Add New Win */}
-                    <BlurView intensity={50} tint="light" style={styles.addWinCard}>
-                        <Text style={styles.cardLabel}>What did you achieve today?</Text>
-                        <View style={styles.inputRow}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="I watered my plants..."
-                                placeholderTextColor={colors.textLight}
-                                value={newWin}
-                                onChangeText={setNewWin}
-                            />
-                            <TouchableOpacity style={styles.addButton} onPress={handleAddWin}>
-                                <Plus size={24} color="#FFF" />
-                            </TouchableOpacity>
-                        </View>
-                    </BlurView>
+                    {/* Divider */}
+                    <View style={styles.sectionDivider} />
 
                     {/* Wins List */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Recent Wins</Text>
+                        <View style={styles.sectionHeaderRow}>
+                            <Text style={styles.sectionTitle}>RECENT LOGS</Text>
+                        </View>
                         <View style={styles.winsList}>
                             {wins.map((win) => (
-                                <BlurView key={win.id} intensity={40} tint="light" style={styles.winCard}>
-                                    <View style={styles.winIcon}>
-                                        <CheckCircle2 size={20} color={colors.success} />
+                                <View key={win.id} style={styles.winItem}>
+                                    <View style={styles.winIconBox}>
+                                        <CheckCircle2 size={18} color={colors.success} />
                                     </View>
                                     <View style={styles.winContent}>
                                         <Text style={styles.winTitle}>{win.title}</Text>
                                         <Text style={styles.winDate}>{win.date}</Text>
                                     </View>
-                                </BlurView>
+                                </View>
                             ))}
                         </View>
                     </View>
+
                 </ScrollView>
-            </LinearGradient>
+            </SafeAreaView>
         </View>
     );
 }
@@ -119,137 +136,164 @@ export function SmallWinsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
-    gradient: {
+    safeArea: {
         flex: 1,
     },
+    abstractBlob: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 300,
+        height: 300,
+        opacity: 0.15,
+    },
     header: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingTop: 60,
-        paddingBottom: layout.spacing.md,
-    },
-    headerContent: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: layout.spacing.xl,
+        paddingTop: layout.spacing.lg,
+        paddingBottom: layout.spacing.lg,
     },
-    title: {
-        fontSize: typography.size.xxl,
+    headerTitleContainer: {
+        gap: 2,
+    },
+    headerSubtitle: {
+        fontSize: 12,
         fontWeight: 'bold',
-        color: colors.textPrimary,
-    },
-    subtitle: {
-        fontSize: typography.size.md,
         color: colors.textSecondary,
-        marginTop: 4,
+        letterSpacing: 1,
+    },
+    headerTitle: {
+        fontSize: 32,
+        fontWeight: '900',
+        color: colors.textPrimary,
+        letterSpacing: -1,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.textPrimary,
+        marginHorizontal: layout.spacing.lg,
     },
     scrollContent: {
         paddingBottom: TAB_BAR_HEIGHT + 20,
     },
-    section: {
-        marginTop: layout.spacing.lg,
+    // Input
+    inputSection: {
+        padding: layout.spacing.xl,
     },
-    sectionTitle: {
-        fontSize: typography.size.lg,
-        fontWeight: 'bold',
-        color: colors.textPrimary,
-        marginLeft: layout.spacing.lg,
-        marginBottom: layout.spacing.md,
-    },
-    badgesScroll: {
-        paddingHorizontal: layout.spacing.lg,
-        gap: 16,
-        paddingBottom: 10,
-    },
-    badgeContainer: {
-        alignItems: 'center',
-        gap: 8,
-    },
-    badgeCircle: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        overflow: 'hidden',
-    },
-    badgeName: {
-        fontSize: typography.size.xs,
-        fontWeight: '500',
-        color: colors.textSecondary,
-    },
-    addWinCard: {
-        marginHorizontal: layout.spacing.lg,
-        marginTop: layout.spacing.lg,
-        padding: layout.spacing.lg,
-        borderRadius: layout.borderRadius.lg,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.glassBorder,
-    },
-    cardLabel: {
-        fontSize: typography.size.md,
-        fontWeight: '500',
-        color: colors.textPrimary,
-        marginBottom: layout.spacing.md,
-    },
-    inputRow: {
+    inputWrapper: {
         flexDirection: 'row',
-        gap: layout.spacing.md,
+        borderWidth: 1,
+        borderColor: colors.textPrimary,
+        height: 56,
         alignItems: 'center',
+        backgroundColor: colors.surface,
     },
     input: {
         flex: 1,
-        backgroundColor: colors.glass,
-        padding: layout.spacing.md,
-        borderRadius: layout.borderRadius.md,
-        fontSize: typography.size.md,
+        paddingHorizontal: 16,
+        fontSize: 16,
+        fontFamily: 'Courier',
         color: colors.textPrimary,
-        borderWidth: 1,
-        borderColor: colors.glassBorder,
     },
     addButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: colors.textPrimary,
+        width: 56,
+        height: 56,
         justifyContent: 'center',
         alignItems: 'center',
+        borderLeftWidth: 1,
+        borderLeftColor: colors.textPrimary,
+        backgroundColor: colors.surfaceWarm,
     },
+    inputHint: {
+        marginTop: 8,
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: colors.textSecondary,
+        letterSpacing: 0.5,
+    },
+    // Sections
+    sectionDivider: {
+        height: 1,
+        backgroundColor: colors.borderDark,
+        marginHorizontal: layout.spacing.lg,
+    },
+    section: {
+        paddingVertical: layout.spacing.xl,
+    },
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: layout.spacing.xl,
+        marginBottom: layout.spacing.lg,
+    },
+    sectionTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+        color: colors.textSecondary,
+    },
+    // Badges
+    badgesScroll: {
+        paddingHorizontal: layout.spacing.xl,
+        gap: 24,
+    },
+    badgeContainer: {
+        alignItems: 'center',
+        gap: 12,
+        width: 80,
+    },
+    badgeCircle: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        position: 'relative',
+    },
+    badgeFill: {
+        ...StyleSheet.absoluteFillObject,
+        borderRadius: 36,
+    },
+    badgeName: {
+        fontSize: 10,
+        fontWeight: '700',
+        color: colors.textPrimary,
+        textAlign: 'center',
+        letterSpacing: 0.5,
+    },
+    // Wins List
     winsList: {
-        paddingHorizontal: layout.spacing.lg,
-        gap: layout.spacing.sm,
+
     },
-    winCard: {
+    winItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: layout.spacing.md,
-        gap: layout.spacing.md,
-        borderRadius: layout.borderRadius.lg,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.glassBorder,
+        paddingHorizontal: layout.spacing.xl,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderDark,
     },
-    winIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: colors.glassOverlay,
-        justifyContent: 'center',
-        alignItems: 'center',
+    winIconBox: {
+        marginRight: 16,
     },
     winContent: {
-        flex: 1,
+        gap: 4,
     },
     winTitle: {
-        fontSize: typography.size.md,
-        fontWeight: '500',
+        fontSize: 16,
+        fontWeight: '600',
         color: colors.textPrimary,
-        marginBottom: 2,
     },
     winDate: {
-        fontSize: typography.size.xs,
+        fontSize: 12,
+        fontFamily: 'Courier',
         color: colors.textSecondary,
+        letterSpacing: 0.5,
     },
 });

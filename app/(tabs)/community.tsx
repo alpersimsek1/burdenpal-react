@@ -1,17 +1,13 @@
-// Spaces Screen - Glassmorphism Topic Cards
-import { BlurView } from 'expo-blur';
+// Spaces Screen - Industrial Minimalist Design
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ChevronRight, MessageSquare, Sparkles, Users } from 'lucide-react-native';
+import { ArrowUpRight, Plus, Users } from 'lucide-react-native';
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ProfileButton } from '../../src/components/ProfileButton';
 import { COMMUNITIES, POSTS } from '../../src/data/communityData';
 import { colors } from '../../src/theme/colors';
 import { layout } from '../../src/theme/layout';
-import { typography } from '../../src/theme/typography';
-
-const BG_SPACES = require('../../assets/backgrounds/bg_spaces.png');
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 100;
@@ -41,271 +37,277 @@ export default function SpacesTab() {
         });
     };
 
+    const FeaturedSpace = COMMUNITIES[0];
+    const OtherSpaces = COMMUNITIES.slice(1);
+
     return (
-        <LinearGradient
-            colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
-            style={styles.container}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-        >
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.headerContent}>
-                    <View>
-                        <Text style={styles.title}>Spaces</Text>
-                        <Text style={styles.subtitle}>Find your community</Text>
-                    </View>
+        <View style={styles.container}>
+            {/* Background */}
+            <LinearGradient
+                colors={[colors.background, colors.backgroundSecondary]}
+                style={StyleSheet.absoluteFill}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+            />
+
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <Text style={styles.pageTitle}>SPACES</Text>
                     <ProfileButton />
                 </View>
-            </View>
 
-            {/* Topics Grid */}
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {/* Featured Topic - Large Card */}
-                <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={() => handleTopicPress(COMMUNITIES[0])}
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
                 >
-                    <BlurView intensity={40} tint="light" style={styles.featuredCard}>
-                        <LinearGradient
-                            colors={[`${COMMUNITIES[0].color}30`, `${COMMUNITIES[0].color}10`]}
-                            style={styles.featuredGradient}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                        >
-                            <View style={styles.featuredHeader}>
-                                <View style={[styles.iconContainer, { backgroundColor: COMMUNITIES[0].color }]}>
-                                    <MessageSquare size={24} color="#FFF" />
-                                </View>
-                                <View style={styles.featuredBadge}>
-                                    <Sparkles size={12} color={colors.accent} />
-                                    <Text style={styles.featuredBadgeText}>Popular</Text>
-                                </View>
+                    {/* Featured Section - Abstract / Industrial Hero */}
+                    <TouchableOpacity
+                        activeOpacity={0.9}
+                        onPress={() => handleTopicPress(FeaturedSpace)}
+                        style={styles.featuredContainer}
+                    >
+                        <View style={styles.featuredContent}>
+                            <View style={styles.featuredLabelRow}>
+                                <Text style={styles.featuredLabel}>FEATURED</Text>
+                                <ArrowUpRight size={20} color={colors.textPrimary} />
                             </View>
-                            <Text style={styles.featuredTitle}>{COMMUNITIES[0].name}</Text>
-                            <Text style={styles.featuredDescription}>{COMMUNITIES[0].description}</Text>
+                            <Text style={styles.featuredTitle}>{FeaturedSpace.name}</Text>
+                            <Text style={styles.featuredDescription}>{FeaturedSpace.description}</Text>
+
                             <View style={styles.featuredStats}>
-                                <View style={styles.statItem}>
-                                    <Users size={14} color={colors.textSecondary} />
+                                <View style={styles.statPill}>
+                                    <Users size={14} color={colors.textPrimary} />
                                     <Text style={styles.statText}>{getMemberCount(0)} members</Text>
                                 </View>
-                                <View style={styles.statItem}>
-                                    <MessageSquare size={14} color={colors.textSecondary} />
-                                    <Text style={styles.statText}>{getPostCount(COMMUNITIES[0].name)} posts</Text>
-                                </View>
                             </View>
-                        </LinearGradient>
-                    </BlurView>
-                </TouchableOpacity>
+                        </View>
+                        {/* Abstract Gradient Blob */}
+                        <LinearGradient
+                            colors={[FeaturedSpace.color, 'transparent']}
+                            style={styles.abstractBlob}
+                            start={{ x: 1, y: 0 }}
+                            end={{ x: 0, y: 1 }}
+                            locations={[0, 0.8]}
+                        />
+                    </TouchableOpacity>
 
-                {/* Other Topics - Grid */}
-                <View style={styles.gridContainer}>
-                    {COMMUNITIES.slice(1).map((community, index) => (
-                        <TouchableOpacity
-                            key={community.id}
-                            activeOpacity={0.9}
-                            onPress={() => handleTopicPress(community)}
-                            style={styles.gridItem}
-                        >
-                            <BlurView intensity={35} tint="light" style={styles.topicCard}>
-                                <View style={[styles.topicColorBar, { backgroundColor: community.color }]} />
-                                <View style={styles.topicContent}>
-                                    <Text style={styles.topicTitle}>{community.name}</Text>
-                                    <Text style={styles.topicDescription} numberOfLines={2}>
+                    {/* Divider */}
+                    <View style={styles.sectionDivider} />
+
+                    {/* List Section */}
+                    <View style={styles.listContainer}>
+                        {OtherSpaces.map((community, index) => (
+                            <TouchableOpacity
+                                key={community.id}
+                                activeOpacity={0.7}
+                                onPress={() => handleTopicPress(community)}
+                                style={styles.listItem}
+                            >
+                                <View style={styles.listItemContent}>
+                                    <View style={styles.listItemHeader}>
+                                        <Text style={styles.listTitle}>{community.name}</Text>
+                                        <ArrowUpRight size={18} color={colors.textSecondary} style={{ opacity: 0.5 }} />
+                                    </View>
+                                    <Text style={styles.listDescription} numberOfLines={2}>
                                         {community.description}
                                     </Text>
-                                    <View style={styles.topicFooter}>
-                                        <Text style={styles.topicPostCount}>
-                                            {getPostCount(community.name)} posts
-                                        </Text>
-                                        <ChevronRight size={16} color={colors.textSecondary} />
+                                    <View style={styles.listMeta}>
+                                        <Text style={styles.metaText}>{getPostCount(community.name)} posts</Text>
+                                        <Text style={styles.metaDot}>•</Text>
+                                        <Text style={styles.metaText}>{getMemberCount(index + 1)} members</Text>
                                     </View>
                                 </View>
-                            </BlurView>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
 
-                {/* Join More Section */}
-                <BlurView intensity={30} tint="light" style={styles.joinSection}>
-                    <Text style={styles.joinTitle}>Looking for something else?</Text>
-                    <Text style={styles.joinSubtitle}>Suggest a new Space for the community</Text>
-                    <TouchableOpacity style={styles.suggestButton}>
-                        <Text style={styles.suggestButtonText}>Suggest a Space</Text>
-                    </TouchableOpacity>
-                </BlurView>
-            </ScrollView>
-        </LinearGradient>
+                    {/* Footer / Suggest */}
+                    <View style={styles.footerSection}>
+                        <Text style={styles.footerText}>Don't see what you're looking for?</Text>
+                        <TouchableOpacity style={styles.suggestButton}>
+                            <Text style={styles.suggestButtonText}>PROPOSE A SPACE</Text>
+                            <Plus size={16} color={colors.textPrimary} />
+                        </TouchableOpacity>
+                    </View>
+
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
+    },
+    safeArea: {
+        flex: 1,
     },
     header: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingTop: 60,
-        paddingBottom: layout.spacing.md,
-    },
-    headerContent: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: layout.spacing.xl,
+        paddingTop: layout.spacing.lg,
+        paddingBottom: layout.spacing.lg,
     },
-    title: {
-        fontSize: typography.size.xxl,
-        fontWeight: 'bold',
+    pageTitle: {
+        fontSize: 32,
+        fontWeight: '900', // Heavy industrial font
         color: colors.textPrimary,
-    },
-    subtitle: {
-        fontSize: typography.size.md,
-        color: colors.textSecondary,
-        marginTop: 4,
+        letterSpacing: -1,
+        textTransform: 'uppercase',
     },
     scrollContent: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingBottom: TAB_BAR_HEIGHT + 20,
+        paddingBottom: TAB_BAR_HEIGHT,
     },
-    // Featured Card
-    featuredCard: {
-        borderRadius: layout.borderRadius.lg,
+    // Featured
+    featuredContainer: {
+        marginHorizontal: layout.spacing.lg,
+        marginBottom: layout.spacing.xl,
+        height: 280,
+        backgroundColor: colors.surface, // Or just transparent if we want purely abstract? Let's use surface for contrast against blue bg
+        borderRadius: 0, // Industrial: sharp corners? Or Minimal: maybe minimal radius. Let's go 4px.
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: colors.glassBorder,
-        marginBottom: layout.spacing.lg,
+        borderColor: colors.borderDark, // Visible border
+        justifyContent: 'space-between',
     },
-    featuredGradient: {
-        padding: layout.spacing.lg,
+    featuredContent: {
+        padding: layout.spacing.xl,
+        zIndex: 2,
     },
-    featuredHeader: {
+    featuredLabelRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: layout.spacing.md,
+        marginBottom: layout.spacing.xl,
     },
-    iconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 14,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    featuredBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        backgroundColor: colors.glass,
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 12,
-    },
-    featuredBadgeText: {
-        fontSize: 11,
-        fontWeight: '600',
-        color: colors.accent,
+    featuredLabel: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+        color: colors.textSecondary,
     },
     featuredTitle: {
-        fontSize: typography.size.xl,
-        fontWeight: 'bold',
+        fontSize: 36,
+        fontWeight: '800',
         color: colors.textPrimary,
-        marginBottom: 8,
+        marginBottom: layout.spacing.sm,
+        lineHeight: 40,
     },
     featuredDescription: {
-        fontSize: typography.size.md,
+        fontSize: 16,
         color: colors.textSecondary,
-        lineHeight: 22,
-        marginBottom: layout.spacing.md,
+        maxWidth: '80%',
+        marginBottom: layout.spacing.lg,
+        lineHeight: 24,
     },
     featuredStats: {
         flexDirection: 'row',
-        gap: 20,
     },
-    statItem: {
+    statPill: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     statText: {
         fontSize: 13,
-        color: colors.textSecondary,
-    },
-    // Grid Cards
-    gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        gap: 12,
-        marginBottom: layout.spacing.lg,
-    },
-    gridItem: {
-        width: (SCREEN_WIDTH - 60) / 2,
-    },
-    topicCard: {
-        borderRadius: layout.borderRadius.lg,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.glassBorder,
-    },
-    topicColorBar: {
-        height: 6,
-    },
-    topicContent: {
-        padding: layout.spacing.md,
-    },
-    topicTitle: {
-        fontSize: typography.size.md,
-        fontWeight: 'bold',
+        fontWeight: '600',
         color: colors.textPrimary,
-        marginBottom: 6,
     },
-    topicDescription: {
+    abstractBlob: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 200,
+        height: 280,
+        opacity: 0.2,
+    },
+    // Divider
+    sectionDivider: {
+        height: 1,
+        backgroundColor: colors.textPrimary, // Strong divider
+        marginHorizontal: layout.spacing.lg,
+        marginBottom: 0,
+    },
+    // List
+    listContainer: {
+
+    },
+    listItem: {
+        paddingHorizontal: layout.spacing.xl,
+        paddingVertical: 24,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderDark,
+    },
+    listItemContent: {
+        gap: 8,
+    },
+    listItemHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    listTitle: {
+        fontSize: 24,
+        fontWeight: '600',
+        color: colors.textPrimary,
+        letterSpacing: -0.5,
+    },
+    listDescription: {
+        fontSize: 15,
+        color: colors.textSecondary,
+        lineHeight: 22,
+        maxWidth: '90%',
+    },
+    listMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+        gap: 8,
+    },
+    metaText: {
         fontSize: 13,
+        fontFamily: 'Courier', // Industrial/Mono feel if available, otherwise fallback
         color: colors.textSecondary,
-        lineHeight: 18,
-        marginBottom: layout.spacing.sm,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
-    topicFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    topicPostCount: {
+    metaDot: {
+        color: colors.borderDark,
         fontSize: 12,
-        color: colors.textLight,
     },
-    // Join Section
-    joinSection: {
-        borderRadius: layout.borderRadius.lg,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.glassBorder,
-        padding: layout.spacing.lg,
+    // Footer
+    footerSection: {
+        padding: layout.spacing.xl,
         alignItems: 'center',
+        marginTop: layout.spacing.lg,
+        gap: 16,
     },
-    joinTitle: {
-        fontSize: typography.size.md,
-        fontWeight: 'bold',
-        color: colors.textPrimary,
-        marginBottom: 4,
-    },
-    joinSubtitle: {
-        fontSize: typography.size.sm,
+    footerText: {
+        fontSize: 16,
         color: colors.textSecondary,
-        marginBottom: layout.spacing.md,
+        fontStyle: 'italic',
     },
     suggestButton: {
-        backgroundColor: colors.textPrimary,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
         paddingHorizontal: 24,
         paddingVertical: 12,
-        borderRadius: layout.borderRadius.xl,
+        borderWidth: 1,
+        borderColor: colors.textPrimary,
     },
     suggestButtonText: {
-        fontSize: typography.size.sm,
-        fontWeight: '600',
-        color: '#FFF',
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: colors.textPrimary,
+        letterSpacing: 1,
     },
 });

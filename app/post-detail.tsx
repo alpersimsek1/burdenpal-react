@@ -1,19 +1,16 @@
-// Post Detail Screen for expo-router
-import { BlurView } from 'expo-blur';
+// Post Detail Screen - Industrial Minimalist
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowBigUp, ArrowLeft, MessageSquare, MoreHorizontal, Send } from 'lucide-react-native';
+import { ArrowLeft, ArrowUpRight } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { colors } from '../src/theme/colors';
 import { layout } from '../src/theme/layout';
-import { typography } from '../src/theme/typography';
 
 const COMMENTS = [
-    { id: 'c1', author: 'helpful_user', time: '1h', body: 'This is great advice! Thanks for sharing.', likes: 12 },
-    { id: 'c2', author: 'lurker_01', time: '30m', body: 'I totally agree with this.', likes: 5 },
-    { id: 'c3', author: 'random_person', time: '10m', body: 'Can you elaborate on the second point?', likes: 2 },
-    { id: 'c4', author: 'expert_dev', time: '5m', body: 'Also consider trying out different approaches to this problem.', likes: 8 },
+    { id: 'c1', author: 'helpful_user', time: '1H AGO', body: 'This is great advice! Thanks for sharing.', likes: 12 },
+    { id: 'c2', author: 'lurker_01', time: '30M AGO', body: 'I totally agree with this.', likes: 5 },
+    { id: 'c3', author: 'random_user', time: '10M AGO', body: 'Can you elaborate on the second point?', likes: 2 },
 ];
 
 export default function PostDetailScreen() {
@@ -31,27 +28,31 @@ export default function PostDetailScreen() {
         comments: Number(params.comments) || 0,
     };
     const communityColor = params.communityColor as string;
-
     const [reply, setReply] = useState('');
 
     return (
-        <LinearGradient
-            colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
-            style={styles.container}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-        >
+        <View style={styles.container}>
+            <LinearGradient
+                colors={[communityColor || colors.primary, 'transparent']}
+                style={styles.abstractBlob}
+                start={{ x: 1, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                locations={[0, 0.4]}
+            />
+
             <SafeAreaView style={styles.safeArea}>
-                {/* Custom Header */}
+                {/* Industrial Header */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <ArrowLeft size={24} color={colors.textPrimary} />
+                        <ArrowLeft size={28} color={colors.textPrimary} />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Post</Text>
-                    <TouchableOpacity style={styles.menuButton}>
-                        <MoreHorizontal size={24} color={colors.textPrimary} />
-                    </TouchableOpacity>
+                    <View style={styles.headerTitleContainer}>
+                        <Text style={styles.headerSubtitle}>THREAD /</Text>
+                        <Text style={styles.headerTitle}>{post.community?.toUpperCase()}</Text>
+                    </View>
                 </View>
+
+                <View style={styles.divider} />
 
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -59,231 +60,206 @@ export default function PostDetailScreen() {
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
                 >
                     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                        {/* Main Post Card */}
-                        <BlurView intensity={40} tint="light" style={styles.postCard}>
-                            <View style={styles.postMeta}>
-                                <View style={[styles.communityDot, { backgroundColor: communityColor || colors.accent }]} />
-                                <Text style={styles.communityName}>{post.community}</Text>
-                                <Text style={styles.metaText}>• {post.time}</Text>
-                            </View>
-
-                            <View style={styles.authorInfo}>
-                                <View style={[styles.avatarPlaceholder, { backgroundColor: communityColor || colors.accent }]}>
-                                    <Text style={styles.avatarInitial}>{post.author?.charAt(0).toUpperCase()}</Text>
+                        {/* Main Post */}
+                        <View style={styles.mainPostContainer}>
+                            <View style={styles.metaRow}>
+                                <View style={[styles.avatarBox, { backgroundColor: communityColor || colors.accent }]}>
+                                    <Text style={styles.avatarText}>{post.author?.charAt(0).toUpperCase()}</Text>
                                 </View>
-                                <Text style={styles.authorName}>{post.author}</Text>
+                                <View>
+                                    <Text style={styles.authorText}>@{post.author?.toUpperCase()}</Text>
+                                    <Text style={styles.timeText}>{post.time?.toUpperCase()}</Text>
+                                </View>
                             </View>
 
                             <Text style={styles.postTitle}>{post.title}</Text>
                             <Text style={styles.postBody}>{post.body}</Text>
 
-                            <View style={styles.actionsRow}>
-                                <View style={styles.actionItem}>
-                                    <ArrowBigUp size={20} color={colors.textSecondary} />
-                                    <Text style={styles.actionCount}>{post.upvotes}</Text>
+                            <View style={styles.statsRow}>
+                                <View style={styles.statTag}>
+                                    <Text style={styles.statLabel}>{post.upvotes} UPVOTES</Text>
                                 </View>
-                                <View style={styles.actionItem}>
-                                    <MessageSquare size={18} color={colors.textSecondary} />
-                                    <Text style={styles.actionCount}>{post.comments} Comments</Text>
+                                <View style={styles.statTag}>
+                                    <Text style={styles.statLabel}>{post.comments} COMMENTS</Text>
                                 </View>
                             </View>
-                        </BlurView>
+                        </View>
 
-                        {/* Comments Label */}
-                        <Text style={styles.sectionLabel}>Discussion</Text>
+                        <View style={styles.sectionDivider}>
+                            <Text style={styles.sectionTitle}>DISCUSSION ({COMMENTS.length})</Text>
+                        </View>
 
                         {/* Comments List */}
                         {COMMENTS.map((comment) => (
-                            <View key={comment.id} style={styles.commentCard}>
+                            <View key={comment.id} style={styles.commentItem}>
                                 <View style={styles.commentHeader}>
-                                    <Text style={styles.commentAuthor}>{comment.author}</Text>
-                                    <Text style={styles.commentTime}>• {comment.time}</Text>
+                                    <Text style={styles.commentAuthor}>@{comment.author.toUpperCase()}</Text>
+                                    <Text style={styles.commentTime}>{comment.time}</Text>
                                 </View>
                                 <Text style={styles.commentBody}>{comment.body}</Text>
-                                <View style={styles.commentActions}>
-                                    <TouchableOpacity style={styles.actionItem}>
-                                        <ArrowBigUp size={16} color={colors.textSecondary} />
-                                        <Text style={styles.commentLikes}>{comment.likes}</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity>
-                                        <Text style={styles.replyLink}>Reply</Text>
-                                    </TouchableOpacity>
-                                </View>
+                                <TouchableOpacity style={styles.replyButton}>
+                                    <Text style={styles.replyText}>REPLY</Text>
+                                    <ArrowUpRight size={12} color={colors.textSecondary} />
+                                </TouchableOpacity>
                             </View>
                         ))}
                     </ScrollView>
 
-                    {/* Input Bar */}
-                    <BlurView intensity={80} tint="light" style={styles.inputContainer}>
-                        <View style={styles.inputWrapper}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Add to the discussion..."
-                                placeholderTextColor={colors.textSecondary}
-                                value={reply}
-                                onChangeText={setReply}
-                                multiline
-                            />
-                            <TouchableOpacity
-                                style={[styles.sendButton, { opacity: reply.trim().length > 0 ? 1 : 0.5 }]}
-                                disabled={reply.trim().length === 0}
-                            >
-                                <LinearGradient
-                                    colors={[colors.accent, colors.moodProgress]}
-                                    style={styles.sendButtonGradient}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                >
-                                    <Send size={18} color="#FFF" />
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        </View>
-                    </BlurView>
+                    {/* Input Area - Industrial Box */}
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="TYPE YOUR REPLY..."
+                            placeholderTextColor={colors.textSecondary}
+                            value={reply}
+                            onChangeText={setReply}
+                        />
+                        <TouchableOpacity style={styles.sendButton}>
+                            <ArrowUpRight size={24} color={colors.textPrimary} />
+                        </TouchableOpacity>
+                    </View>
                 </KeyboardAvoidingView>
             </SafeAreaView>
-        </LinearGradient>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     safeArea: {
         flex: 1,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: layout.spacing.lg,
-        paddingVertical: layout.spacing.md,
+    abstractBlob: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 400,
+        height: 400,
+        opacity: 0.1,
     },
-    headerTitle: {
-        fontSize: typography.size.lg,
-        fontWeight: 'bold',
-        color: colors.textPrimary,
+    header: {
+        paddingHorizontal: layout.spacing.xl,
+        paddingTop: layout.spacing.lg,
+        paddingBottom: layout.spacing.md,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
+        marginBottom: layout.spacing.md,
+        alignSelf: 'flex-start',
     },
-    menuButton: {
-        width: 40,
-        height: 40,
-        alignItems: 'flex-end',
-        justifyContent: 'center',
+    headerTitleContainer: {
+        gap: 2,
+    },
+    headerSubtitle: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: colors.textSecondary,
+        letterSpacing: 1,
+    },
+    headerTitle: {
+        fontSize: 24,
+        fontWeight: '900',
+        color: colors.textPrimary,
+        letterSpacing: -0.5,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.textPrimary,
+        marginHorizontal: layout.spacing.lg,
     },
     content: {
-        paddingHorizontal: 0, // Full width
-        paddingBottom: 100, // Space for input
-        paddingTop: 10,
+        paddingBottom: 100,
     },
     // Main Post
-    // Main Post
-    postCard: {
-        padding: layout.spacing.lg,
-        width: '100%',
-        backgroundColor: 'transparent',
+    mainPostContainer: {
+        padding: layout.spacing.xl,
     },
-    // ... (rest of styles)
-    postMeta: {
+    metaRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
+        gap: 12,
+        marginBottom: 16,
     },
-    communityDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        marginRight: 6,
-    },
-    communityName: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: colors.textPrimary,
-    },
-    metaText: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        marginLeft: 4,
-    },
-    authorInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: layout.spacing.md,
-        gap: 8,
-    },
-    avatarPlaceholder: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+    avatarBox: {
+        width: 40,
+        height: 40,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.textPrimary,
     },
-    avatarInitial: {
+    avatarText: {
         color: '#FFF',
-        fontSize: 16,
         fontWeight: 'bold',
+        fontSize: 18,
     },
-    authorName: {
+    authorText: {
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: 'bold',
         color: colors.textPrimary,
+        letterSpacing: 0.5,
+    },
+    timeText: {
+        fontSize: 12,
+        fontFamily: 'Courier',
+        color: colors.textSecondary,
     },
     postTitle: {
-        fontSize: typography.size.xl,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '800',
         color: colors.textPrimary,
-        marginBottom: 8,
-        lineHeight: 28,
+        marginBottom: 12,
+        lineHeight: 34,
     },
     postBody: {
-        fontSize: typography.size.md,
-        color: colors.textSecondary,
-        lineHeight: 24,
-        marginBottom: layout.spacing.lg,
+        fontSize: 18,
+        color: colors.textPrimary, // Darker text for readability in detail
+        lineHeight: 28,
+        marginBottom: 24,
     },
-    actionsRow: {
+    statsRow: {
         flexDirection: 'row',
-        gap: 20,
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        paddingBottom: 12,
-        borderBottomWidth: 1, // Separator
-        borderBottomColor: colors.border,
+        gap: 12,
     },
-    actionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
+    statTag: {
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: colors.borderDark,
+        backgroundColor: 'transparent',
     },
-    actionCount: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    sectionLabel: {
-        fontSize: typography.size.md,
+    statLabel: {
+        fontSize: 12,
         fontWeight: 'bold',
         color: colors.textPrimary,
-        marginBottom: layout.spacing.md,
-        marginLeft: layout.spacing.lg,
-        marginTop: layout.spacing.md,
     },
-    // Comments
-    commentCard: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingVertical: layout.spacing.md,
-        backgroundColor: 'transparent',
+    // Comments Section
+    sectionDivider: {
+        borderTopWidth: 1,
+        borderTopColor: colors.borderDark,
+        paddingHorizontal: layout.spacing.xl,
+        paddingVertical: 16,
+        backgroundColor: 'rgba(0,0,0,0.02)',
+    },
+    sectionTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+        color: colors.textSecondary,
+    },
+    commentItem: {
+        paddingHorizontal: layout.spacing.xl,
+        paddingVertical: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomColor: colors.borderDark,
     },
     commentHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 6,
+        marginBottom: 8,
     },
     commentAuthor: {
         fontSize: 13,
@@ -292,71 +268,48 @@ const styles = StyleSheet.create({
     },
     commentTime: {
         fontSize: 12,
+        fontFamily: 'Courier',
         color: colors.textSecondary,
     },
     commentBody: {
-        fontSize: 14,
+        fontSize: 15,
         color: colors.textPrimary,
-        lineHeight: 20,
-        marginBottom: 8,
+        lineHeight: 22,
+        marginBottom: 12,
     },
-    commentActions: {
+    replyButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
+        gap: 4,
+        alignSelf: 'flex-start',
     },
-    commentLikes: {
+    replyText: {
         fontSize: 12,
-        color: colors.textSecondary,
-    },
-    replyLink: {
-        fontSize: 12,
-        fontWeight: '600',
+        fontWeight: 'bold',
         color: colors.textSecondary,
     },
     // Input
     inputContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingHorizontal: layout.spacing.lg,
-        paddingTop: 12,
-        paddingBottom: Platform.OS === 'ios' ? 40 : 12,
-        borderTopWidth: 1,
-        borderTopColor: colors.glassBorder,
-    },
-    inputWrapper: {
         flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 24,
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        minHeight: 48,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        padding: layout.spacing.lg,
+        borderTopWidth: 2,
+        borderTopColor: colors.textPrimary,
+        backgroundColor: colors.background,
     },
     input: {
         flex: 1,
-        fontSize: 15,
+        fontSize: 16,
+        fontFamily: 'Courier',
         color: colors.textPrimary,
-        paddingHorizontal: 10,
-        paddingTop: 0,
-        paddingBottom: 0,
-        maxHeight: 100,
+        height: 50,
     },
     sendButton: {
-        marginLeft: 8,
-    },
-    sendButtonGradient: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
+        width: 50,
+        height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-    },
+        backgroundColor: colors.surfaceWarm,
+        borderWidth: 1,
+        borderColor: colors.textPrimary,
+    }
 });

@@ -1,14 +1,12 @@
-// Topic Feed Screen for expo-router
-import { BlurView } from 'expo-blur';
+// Topic Feed Screen - Industrial Minimalist
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowBigUp, ArrowLeft, MessageSquare, MoreHorizontal } from 'lucide-react-native';
+import { ArrowLeft, ArrowUpRight, MessageSquare } from 'lucide-react-native';
 import React from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { POSTS } from '../src/data/communityData';
 import { colors } from '../src/theme/colors';
 import { layout } from '../src/theme/layout';
-import { typography } from '../src/theme/typography';
 
 const TAB_BAR_HEIGHT = 100;
 
@@ -24,7 +22,7 @@ export default function TopicFeedScreen() {
 
     const renderPost = ({ item }: { item: typeof POSTS[0] }) => (
         <TouchableOpacity
-            activeOpacity={0.9}
+            activeOpacity={0.7}
             onPress={() => router.push({
                 pathname: '/post-detail',
                 params: {
@@ -38,68 +36,60 @@ export default function TopicFeedScreen() {
                     communityColor: communityColor || colors.accent,
                 }
             })}
-            style={styles.postWrapper}
+            style={styles.postItem}
         >
-            <BlurView intensity={40} tint="light" style={styles.postCard}>
-                {/* Header */}
-                <View style={styles.postHeader}>
-                    <View style={styles.authorRow}>
-                        <View style={[styles.avatarPlaceholder, { backgroundColor: communityColor || colors.accent }]}>
-                            <Text style={styles.avatarInitial}>{item.author.charAt(0).toUpperCase()}</Text>
-                        </View>
-                        <View>
-                            <Text style={styles.authorText}>{item.author}</Text>
-                            <Text style={styles.timeText}>{item.time}</Text>
-                        </View>
-                    </View>
-                    <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                        <MoreHorizontal size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
+            <View style={styles.postContent}>
+                <View style={styles.postMetaRow}>
+                    <Text style={styles.metaText}>@{item.author.toUpperCase()}</Text>
+                    <Text style={styles.metaDot}>•</Text>
+                    <Text style={styles.metaText}>{item.time}</Text>
                 </View>
 
-                {/* Content */}
                 <Text style={styles.postTitle}>{item.title}</Text>
                 <Text style={styles.postBody} numberOfLines={3}>{item.body}</Text>
 
-                {/* Actions */}
-                <View style={styles.actionsRow}>
-                    <View style={styles.actionItem}>
-                        <ArrowBigUp size={20} color={colors.textSecondary} />
-                        <Text style={styles.actionCount}>{item.upvotes}</Text>
+                <View style={styles.postStats}>
+                    <View style={styles.statItem}>
+                        <ArrowUpRight size={16} color={colors.textSecondary} />
+                        <Text style={styles.statText}>{item.upvotes} UPVOTES</Text>
                     </View>
-                    <View style={styles.actionItem}>
-                        <MessageSquare size={18} color={colors.textSecondary} />
-                        <Text style={styles.actionCount}>{item.comments}</Text>
+                    <View style={styles.statItem}>
+                        <MessageSquare size={16} color={colors.textSecondary} />
+                        <Text style={styles.statText}>{item.comments} REPLIES</Text>
                     </View>
                 </View>
-            </BlurView>
+            </View>
         </TouchableOpacity>
     );
 
     return (
-        <LinearGradient
-            colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
-            style={styles.container}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-        >
+        <View style={styles.container}>
+            {/* Abstract Gradient Background Accent */}
+            <LinearGradient
+                colors={[communityColor || colors.primary, 'transparent']}
+                style={styles.abstractBlob}
+                start={{ x: 1, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                locations={[0, 0.7]}
+            />
+
             <SafeAreaView style={styles.safeArea}>
-                {/* Custom Blended Header */}
+                {/* Industrial Header */}
                 <View style={styles.header}>
                     <TouchableOpacity
                         onPress={() => router.back()}
                         style={styles.backButton}
                     >
-                        <ArrowLeft size={24} color={colors.textPrimary} />
+                        <ArrowLeft size={28} color={colors.textPrimary} />
                     </TouchableOpacity>
 
                     <View style={styles.headerTitleContainer}>
-                        <View style={[styles.communityDot, { backgroundColor: communityColor || colors.accent }]} />
-                        <Text style={styles.headerTitle}>{communityName}</Text>
+                        <Text style={styles.headerSubtitle}>TOPIC /</Text>
+                        <Text style={styles.headerTitle}>{communityName?.toUpperCase()}</Text>
                     </View>
-
-                    <View style={{ width: 40 }} />
                 </View>
+
+                <View style={styles.divider} />
 
                 <FlatList
                     data={filteredPosts}
@@ -107,146 +97,145 @@ export default function TopicFeedScreen() {
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.feed}
                     showsVerticalScrollIndicator={false}
+                    ItemSeparatorComponent={() => <View style={styles.separator} />}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>No posts yet in {communityName}.</Text>
-                            <Text style={styles.emptySubtext}>Be the first to start a conversation!</Text>
+                            <Text style={styles.emptyText}>NO POSTS YET</Text>
+                            <Text style={styles.emptySubtext}>BE THE FIRST TO START.</Text>
                         </View>
                     }
                 />
             </SafeAreaView>
-        </LinearGradient>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     safeArea: {
         flex: 1,
     },
+    abstractBlob: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 300,
+        height: 300,
+        opacity: 0.15,
+    },
     header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: layout.spacing.lg,
-        paddingVertical: layout.spacing.md,
-        marginBottom: 10,
+        paddingHorizontal: layout.spacing.xl,
+        paddingTop: layout.spacing.lg,
+        paddingBottom: layout.spacing.lg,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
+        marginBottom: layout.spacing.md,
+        alignSelf: 'flex-start',
     },
     headerTitleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
+        gap: 4,
     },
-    communityDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+    headerSubtitle: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: colors.textSecondary,
+        letterSpacing: 1,
     },
     headerTitle: {
-        fontSize: typography.size.lg,
-        fontWeight: 'bold',
+        fontSize: 32,
+        fontWeight: '900',
         color: colors.textPrimary,
+        letterSpacing: -1,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.textPrimary, // Strong divider
+        marginHorizontal: layout.spacing.lg,
     },
     feed: {
         paddingBottom: TAB_BAR_HEIGHT,
-        // Removed paddingHorizontal to stretch to sides
     },
     separator: {
         height: 1,
-        backgroundColor: colors.border,
-        marginLeft: layout.spacing.lg, // Inset
+        backgroundColor: colors.borderDark,
+        marginHorizontal: layout.spacing.lg,
     },
-    postWrapper: {
-        // Removed margins
+    // Post Item
+    postItem: {
+        paddingHorizontal: layout.spacing.xl,
+        paddingVertical: 24,
     },
-    postCard: {
-        padding: layout.spacing.lg,
-        backgroundColor: 'transparent', // No white box
-        // Removed shadows/radius
+    postContent: {
+        gap: 8,
     },
-    postHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: layout.spacing.md,
-    },
-    authorRow: {
+    postMetaRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: 8,
+        marginBottom: 4,
     },
-    avatarPlaceholder: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    avatarInitial: {
-        color: '#FFF',
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    authorText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.textPrimary,
-    },
-    timeText: {
+    metaText: {
         fontSize: 12,
+        fontFamily: 'Courier', // Mono if available
         color: colors.textSecondary,
+        letterSpacing: 0.5,
+        fontWeight: '600',
+    },
+    metaDot: {
+        fontSize: 10,
+        color: colors.borderDark,
     },
     postTitle: {
-        fontSize: typography.size.lg,
+        fontSize: 22,
         fontWeight: 'bold',
         color: colors.textPrimary,
-        marginBottom: 6,
-        lineHeight: 24,
+        letterSpacing: -0.5,
+        lineHeight: 28,
     },
     postBody: {
-        fontSize: typography.size.md,
+        fontSize: 16,
         color: colors.textSecondary,
-        lineHeight: 20,
-        marginBottom: layout.spacing.md,
+        lineHeight: 24,
+        marginTop: 4,
+        marginBottom: 12,
     },
-    actionsRow: {
+    postStats: {
         flexDirection: 'row',
-        gap: 20,
-        paddingTop: 10,
-        borderTopWidth: 1,
-        borderTopColor: colors.border, // Explicit separator line
+        gap: 16,
     },
-    actionItem: {
+    statItem: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderWidth: 1,
+        borderColor: colors.borderDark,
+        borderRadius: 0, // Sharp corners
     },
-    actionCount: {
-        fontSize: 13,
-        fontWeight: '500',
-        color: colors.textSecondary,
+    statText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: colors.textPrimary,
+        letterSpacing: 0.5,
     },
     emptyContainer: {
-        padding: layout.spacing.xl,
+        padding: 40,
         alignItems: 'center',
-        marginTop: 40,
+        gap: 8,
     },
     emptyText: {
+        fontSize: 18,
+        fontWeight: 'bold',
         color: colors.textPrimary,
-        fontSize: typography.size.lg,
-        fontWeight: '600',
+        letterSpacing: 1,
     },
     emptySubtext: {
+        fontSize: 14,
         color: colors.textSecondary,
-        fontSize: typography.size.md,
-        marginTop: 4,
+        fontStyle: 'italic',
     },
 });
