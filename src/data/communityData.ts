@@ -1,9 +1,9 @@
 export const COMMUNITIES = [
-    { id: '1', name: 'General', color: '#10B981', description: 'General discussions and daily chat.' },
-    { id: '2', name: 'Career Advice', color: '#3B82F6', description: 'Resume tips, interview prep, and career growth.' },
-    { id: '3', name: 'Vent', color: '#EF4444', description: 'A safe space to let it all out.' },
-    { id: '4', name: 'Small Wins', color: '#F59E0B', description: 'Celebrate your daily achievements!' },
-    { id: '5', name: 'Anxiety', color: '#8B5CF6', description: 'Support for managing stress and anxiety.' },
+    { id: '1', name: 'General', color: '#B8C4A8', description: 'General discussions and daily chat.' },
+    { id: '2', name: 'Career Advice', color: '#A8C4B8', description: 'Resume tips, interview prep, and career growth.' },
+    { id: '3', name: 'Vent', color: '#D4A5A5', description: 'A safe space to let it all out.' },
+    { id: '4', name: 'Small Wins', color: '#DBC5A0', description: 'Celebrate your daily achievements!' },
+    { id: '5', name: 'Anxiety', color: '#C4B8D4', description: 'Support for managing stress and anxiety.' },
 ];
 
 export const POSTS = [

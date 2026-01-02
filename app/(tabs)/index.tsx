@@ -1,170 +1,563 @@
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Check, X } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Bell, Heart, Layers, MessageCircle, Sparkles, User, Users, X } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Dimensions, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+    Extrapolation,
+    interpolate,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming,
+} from 'react-native-reanimated';
 import { ProfileButton } from '../../src/components/ProfileButton';
-import { Screen } from '../../src/components/Screen';
-import { SwipeCard, SwipeCardRef } from '../../src/components/SwipeCard';
 import { colors } from '../../src/theme/colors';
 import { layout } from '../../src/theme/layout';
 import { typography } from '../../src/theme/typography';
 
-// Native tab bar height constant (iOS native tabs are typically ~83pt + safe area)
+const BG_PAL = require('../../assets/backgrounds/bg_pal.png');
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 100;
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 
-const BUDDY_ROLES = [
-    'Software Engineer', 'Product Designer', 'Marketing Specialist', 'Data Analyst',
-    'Content Writer', 'Sales Associate', 'HR Assistant', 'Graphic Designer'
+// Mock Pal data with feelings, hobbies, and ideals
+const MOCK_PALS = [
+    {
+        id: '1',
+        name: 'Sarah Chen',
+        avatar: require('../../assets/avatars/female1.png'),
+        isAvailable: true,
+        rating: 4.8,
+        feeling: 'Hopeful & Curious',
+        hobbies: 'Hiking • Photography • Cooking',
+        ideals: 'Growth mindset • Authenticity • Kindness',
+        mutualConnections: [
+            require('../../assets/avatars/male1.png'),
+            require('../../assets/avatars/male2.png'),
+        ]
+    },
+    {
+        id: '2',
+        name: 'Marcus Johnson',
+        avatar: require('../../assets/avatars/male1.png'),
+        isAvailable: true,
+        rating: 4.9,
+        feeling: 'Peaceful & Content',
+        hobbies: 'Music • Reading • Yoga',
+        ideals: 'Compassion • Balance • Learning',
+        mutualConnections: [
+            require('../../assets/avatars/female1.png'),
+            require('../../assets/avatars/female2.png'),
+        ]
+    },
+    {
+        id: '3',
+        name: 'Emma Williams',
+        avatar: require('../../assets/avatars/female2.png'),
+        isAvailable: false,
+        rating: 4.7,
+        feeling: 'Energetic & Inspired',
+        hobbies: 'Painting • Dancing • Traveling',
+        ideals: 'Creativity • Adventure • Connection',
+        mutualConnections: [
+            require('../../assets/avatars/male1.png'),
+            require('../../assets/avatars/female1.png'),
+        ]
+    },
+    {
+        id: '4',
+        name: 'David Kim',
+        avatar: require('../../assets/avatars/male2.png'),
+        isAvailable: true,
+        rating: 5.0,
+        feeling: 'Calm & Reflective',
+        hobbies: 'Meditation • Writing • Chess',
+        ideals: 'Wisdom • Patience • Empathy',
+        mutualConnections: [
+            require('../../assets/avatars/female2.png'),
+            require('../../assets/avatars/male1.png'),
+        ]
+    },
 ];
 
-const MENTOR_ROLES = [
-    'Senior Manager', 'Tech Lead', 'VP of Engineering', 'Creative Director',
-    'Chief Marketing Officer', 'Product Lead', 'Startup Founder', 'Senior Consultant'
+// Recent chats mock data
+const RECENT_CHATS = [
+    {
+        id: '1',
+        name: 'Sarah Chen',
+        avatar: require('../../assets/avatars/female1.png'),
+        lastMessage: 'That sounds like a great idea! Let me know how it goes.',
+        time: '2m ago',
+        unread: 2,
+    },
+    {
+        id: '2',
+        name: 'Marcus Johnson',
+        avatar: require('../../assets/avatars/male1.png'),
+        lastMessage: 'Thanks for sharing that with me. I really appreciate it.',
+        time: '1h ago',
+        unread: 0,
+    },
+    {
+        id: '3',
+        name: 'Emma Williams',
+        avatar: require('../../assets/avatars/female2.png'),
+        lastMessage: 'How are you feeling today?',
+        time: '3h ago',
+        unread: 1,
+    },
 ];
 
-const BUDDY_NAMES = [
-    'Sarah', 'Mike', 'Jessica', 'David', 'Emily', 'Chris', 'Amanda', 'Daniel',
-    'Ashley', 'Brian', 'Megan', 'Joshua', 'Rachel', 'Andrew', 'Lauren', 'Kevin',
-    'Olivia', 'Justin', 'Hannah', 'Matthew'
-];
+// Tab types
+type TabType = 'pal' | 'mentor' | 'circles';
 
-const MENTOR_NAMES = [
-    'Robert', 'Jennifer', 'William', 'Elizabeth', 'James', 'Linda', 'John', 'Susan',
-    'Michael', 'Karen', 'Thomas', 'Nancy', 'Richard', 'Lisa', 'Charles', 'Betty',
-    'Joseph', 'Margaret', 'Christopher', 'Sandra'
-];
+// Swipeable Pal Card Component
+function SwipeablePalCard({
+    pal,
+    onSwipeLeft,
+    onSwipeRight
+}: {
+    pal: typeof MOCK_PALS[0];
+    onSwipeLeft: () => void;
+    onSwipeRight: () => void;
+}) {
+    const translateX = useSharedValue(0);
+    const translateY = useSharedValue(0);
 
-const INITIAL_BUDDIES = Array.from({ length: 20 }).map((_, i) => ({
-    id: `b${i + 1}`,
-    name: BUDDY_NAMES[i % BUDDY_NAMES.length],
-    age: 22 + (i % 8),
-    role: BUDDY_ROLES[i % BUDDY_ROLES.length],
-    location: i % 3 === 0 ? 'New York, USA' : i % 3 === 1 ? 'London, UK' : 'Remote',
-    tags: ['Early Career', 'Tech', 'Growth'],
-    bio: `Passionate ${BUDDY_ROLES[i % BUDDY_ROLES.length]} looking to connect and grow together.`
-}));
+    const gesture = Gesture.Pan()
+        .onUpdate((event) => {
+            translateX.value = event.translationX;
+            translateY.value = event.translationY * 0.5;
+        })
+        .onEnd((event) => {
+            if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
+                const destX = event.translationX > 0 ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
+                translateX.value = withTiming(destX, { duration: 250 }, () => {
+                    if (event.translationX > 0) {
+                        runOnJS(onSwipeRight)();
+                    } else {
+                        runOnJS(onSwipeLeft)();
+                    }
+                });
+            } else {
+                translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
+                translateY.value = withSpring(0, { damping: 20, stiffness: 300 });
+            }
+        });
 
-const INITIAL_MENTORS = Array.from({ length: 20 }).map((_, i) => ({
-    id: `m${i + 1}`,
-    name: MENTOR_NAMES[i % MENTOR_NAMES.length],
-    age: 35 + (i % 15),
-    role: MENTOR_ROLES[i % MENTOR_ROLES.length],
-    location: i % 3 === 0 ? 'San Francisco, CA' : i % 3 === 1 ? 'Berlin, DE' : 'Remote',
-    tags: ['Leadership', 'Strategy', 'Career'],
-    bio: `Experienced ${MENTOR_ROLES[i % MENTOR_ROLES.length]} ready to help you navigate your career path.`
-}));
+    const animatedCardStyle = useAnimatedStyle(() => {
+        const rotate = interpolate(
+            translateX.value,
+            [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
+            [-15, 0, 15],
+            Extrapolation.CLAMP
+        );
+        return {
+            transform: [
+                { translateX: translateX.value },
+                { translateY: translateY.value },
+                { rotate: `${rotate}deg` },
+            ],
+        };
+    });
 
-const MESSAGES = [
-    { id: '1', name: 'James', message: 'Hey! Did you finish the task?', time: '2m' },
-    { id: '2', name: 'Mia', message: 'Thanks for the advice!', time: '1h' },
-    { id: '3', name: 'Lucas', message: "Let's sync tomorrow.", time: '3h' },
-];
+    const likeOverlayStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(
+            translateX.value,
+            [0, SCREEN_WIDTH / 4],
+            [0, 0.8],
+            Extrapolation.CLAMP
+        );
+        return { opacity };
+    });
 
-export default function BuddyScreen() {
+    const nopeOverlayStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(
+            translateX.value,
+            [-SCREEN_WIDTH / 4, 0],
+            [0.8, 0],
+            Extrapolation.CLAMP
+        );
+        return { opacity };
+    });
+
+    const handleButtonSwipeLeft = () => {
+        translateX.value = withTiming(-SCREEN_WIDTH * 1.5, { duration: 250 }, () => {
+            runOnJS(onSwipeLeft)();
+        });
+    };
+
+    const handleButtonSwipeRight = () => {
+        translateX.value = withTiming(SCREEN_WIDTH * 1.5, { duration: 250 }, () => {
+            runOnJS(onSwipeRight)();
+        });
+    };
+
+    return (
+        <GestureDetector gesture={gesture}>
+            <Animated.View style={[styles.palCardContainer, animatedCardStyle]}>
+                <ImageBackground
+                    source={pal.avatar}
+                    style={styles.palCardBackground}
+                    resizeMode="cover"
+                >
+                    {/* Like overlay */}
+                    <Animated.View style={[styles.swipeOverlay, styles.likeOverlay, likeOverlayStyle]}>
+                        <View style={styles.swipeStamp}>
+                            <Text style={styles.swipeStampTextLike}>CONNECT</Text>
+                        </View>
+                    </Animated.View>
+
+                    {/* Nope overlay */}
+                    <Animated.View style={[styles.swipeOverlay, styles.nopeOverlay, nopeOverlayStyle]}>
+                        <View style={styles.swipeStamp}>
+                            <Text style={styles.swipeStampTextNope}>PASS</Text>
+                        </View>
+                    </Animated.View>
+
+                    {/* Spacer for top area */}
+                    <View style={{ flex: 1 }} />
+
+                    {/* Bottom gradient overlay with info */}
+                    <LinearGradient
+                        colors={['transparent', 'rgba(255,255,255,0.85)', 'rgba(255,255,255,0.98)']}
+                        style={styles.palCardBottomGradient}
+                    >
+                        {/* Name */}
+                        <Text style={styles.palName}>{pal.name}</Text>
+
+                        {/* Info chips */}
+                        <View style={styles.infoChipsContainer}>
+                            <View style={styles.infoChip}>
+                                <Text style={styles.infoChipIcon}>💭</Text>
+                                <Text style={styles.infoChipText}>{pal.feeling}</Text>
+                            </View>
+                            <View style={styles.infoChip}>
+                                <Text style={styles.infoChipIcon}>✨</Text>
+                                <Text style={styles.infoChipText}>{pal.hobbies}</Text>
+                            </View>
+                            <View style={styles.infoChip}>
+                                <Text style={styles.infoChipIcon}>💫</Text>
+                                <Text style={styles.infoChipText}>{pal.ideals}</Text>
+                            </View>
+                        </View>
+
+                        {/* Action buttons */}
+                        <View style={styles.actionButtonsContainer}>
+                            <TouchableOpacity
+                                style={styles.rejectButton}
+                                onPress={handleButtonSwipeLeft}
+                                activeOpacity={0.8}
+                            >
+                                <X size={28} color={colors.textSecondary} />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.acceptButton}
+                                onPress={handleButtonSwipeRight}
+                                activeOpacity={0.8}
+                            >
+                                <Heart size={28} color="#FFF" fill="#FFF" />
+                            </TouchableOpacity>
+                        </View>
+                    </LinearGradient>
+                </ImageBackground>
+            </Animated.View>
+        </GestureDetector>
+    );
+}
+
+export default function PalScreen() {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'buddy' | 'mentor'>('buddy');
-    const [buddies, setBuddies] = useState(INITIAL_BUDDIES);
-    const [mentors, setMentors] = useState(INITIAL_MENTORS);
+    const [activeTab, setActiveTab] = useState<TabType>('pal');
+    const [viewMode, setViewMode] = useState<'cards' | 'messages'>('cards');
+    const [likedPals, setLikedPals] = useState<string[]>([]);
+    const [rejectedPals, setRejectedPals] = useState<string[]>([]);
 
-    const currentStack = activeTab === 'buddy' ? buddies : mentors;
-    const setStack = activeTab === 'buddy' ? setBuddies : setMentors;
-    const topCardRef = useRef<SwipeCardRef>(null);
+    // Filter out liked and rejected pals
+    const availablePals = MOCK_PALS.filter(
+        pal => !likedPals.includes(pal.id) && !rejectedPals.includes(pal.id)
+    );
 
-    const handleSwipe = () => {
-        setStack((prev) => prev.slice(1));
+    const handleSwipeLeft = (palId: string) => {
+        setRejectedPals(prev => [...prev, palId]);
+    };
+
+    const handleSwipeRight = (palId: string) => {
+        setLikedPals(prev => [...prev, palId]);
+    };
+
+    const toggleViewMode = () => {
+        setViewMode(prev => prev === 'cards' ? 'messages' : 'cards');
+    };
+
+    const getTabTitle = () => {
+        switch (activeTab) {
+            case 'pal': return 'Pal';
+            case 'mentor': return 'Mentor';
+            case 'circles': return 'Circles';
+        }
+    };
+
+    const renderCirclesComingSoon = () => (
+        <View style={styles.comingSoonContainer}>
+            <BlurView intensity={50} tint="light" style={styles.comingSoonCard}>
+                <View style={styles.comingSoonIconContainer}>
+                    <LinearGradient
+                        colors={[colors.accent, colors.moodGreat]}
+                        style={styles.comingSoonIconBg}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                    >
+                        <Users size={48} color="#FFF" />
+                    </LinearGradient>
+                </View>
+                <Text style={styles.comingSoonTitle}>Circles</Text>
+                <Text style={styles.comingSoonSubtitle}>Coming Soon</Text>
+                <Text style={styles.comingSoonDescription}>
+                    Create and join group chats with like-minded people. Share experiences, get support, and grow together.
+                </Text>
+
+                <View style={styles.comingSoonFeatures}>
+                    <View style={styles.featureItem}>
+                        <Sparkles size={20} color={colors.accent} />
+                        <Text style={styles.featureText}>Create your own circles</Text>
+                    </View>
+                    <View style={styles.featureItem}>
+                        <Users size={20} color={colors.moodGreat} />
+                        <Text style={styles.featureText}>Join topic-based groups</Text>
+                    </View>
+                    <View style={styles.featureItem}>
+                        <Bell size={20} color={colors.warning} />
+                        <Text style={styles.featureText}>Get notified when it launches</Text>
+                    </View>
+                </View>
+
+                <TouchableOpacity style={styles.notifyButton}>
+                    <Text style={styles.notifyButtonText}>Notify Me</Text>
+                </TouchableOpacity>
+            </BlurView>
+        </View>
+    );
+
+    const renderNoMoreCards = () => (
+        <View style={styles.noMoreCardsContainer}>
+            <BlurView intensity={50} tint="light" style={styles.noMoreCardsCard}>
+                <Text style={styles.noMoreCardsEmoji}>🎉</Text>
+                <Text style={styles.noMoreCardsTitle}>You've seen everyone!</Text>
+                <Text style={styles.noMoreCardsSubtitle}>
+                    Check back later for new pals
+                </Text>
+                <TouchableOpacity
+                    style={styles.resetButton}
+                    onPress={() => {
+                        setLikedPals([]);
+                        setRejectedPals([]);
+                    }}
+                >
+                    <Text style={styles.resetButtonText}>Start Over</Text>
+                </TouchableOpacity>
+            </BlurView>
+        </View>
+    );
+
+    const renderRecentChats = () => (
+        <View style={styles.recentChatsContainer}>
+            <View style={styles.recentChatsHeader}>
+                <Text style={styles.recentChatsTitle}>Recent Conversations</Text>
+            </View>
+            <ScrollView
+                style={styles.chatsList}
+                contentContainerStyle={styles.chatsListContent}
+                showsVerticalScrollIndicator={false}
+            >
+                {RECENT_CHATS.map((chat) => (
+                    <TouchableOpacity
+                        key={chat.id}
+                        style={styles.chatItem}
+                        onPress={() => router.push({ pathname: '/chat-detail', params: { id: chat.id, name: chat.name } })}
+                        activeOpacity={0.7}
+                    >
+                        <Image source={chat.avatar} style={styles.chatAvatar} />
+                        <View style={styles.chatContent}>
+                            <View style={styles.chatHeader}>
+                                <Text style={styles.chatName}>{chat.name}</Text>
+                                <Text style={styles.chatTime}>{chat.time}</Text>
+                            </View>
+                            <Text style={styles.chatMessage} numberOfLines={1}>
+                                {chat.lastMessage}
+                            </Text>
+                        </View>
+                        {chat.unread > 0 && (
+                            <View style={styles.unreadBadge}>
+                                <Text style={styles.unreadText}>{chat.unread}</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+        </View>
+    );
+
+    const renderCardStack = () => {
+        // Render up to 3 cards in a stack
+        const cardsToRender = availablePals.slice(0, 3);
+
+        return (
+            <View style={styles.cardStackWrapper}>
+                {cardsToRender.map((pal, index) => {
+                    // Calculate scale and offset for stack effect
+                    const scale = 1 - (index * 0.04);
+                    const translateY = index * 12;
+
+                    // Only the top card (index 0) is swipeable
+                    if (index === 0) {
+                        return (
+                            <SwipeablePalCard
+                                key={pal.id}
+                                pal={pal}
+                                onSwipeLeft={() => handleSwipeLeft(pal.id)}
+                                onSwipeRight={() => handleSwipeRight(pal.id)}
+                            />
+                        );
+                    }
+
+                    // Background cards are static
+                    return (
+                        <View
+                            key={pal.id}
+                            style={[
+                                styles.backgroundCard,
+                                {
+                                    transform: [
+                                        { scale },
+                                        { translateY },
+                                    ],
+                                    zIndex: -index,
+                                }
+                            ]}
+                        >
+                            <ImageBackground
+                                source={pal.avatar}
+                                style={styles.palCardBackground}
+                                resizeMode="cover"
+                            >
+                                <LinearGradient
+                                    colors={['transparent', 'rgba(255,255,255,0.85)', 'rgba(255,255,255,0.98)']}
+                                    style={styles.backgroundCardGradient}
+                                >
+                                    <Text style={styles.backgroundCardName}>{pal.name}</Text>
+                                </LinearGradient>
+                            </ImageBackground>
+                        </View>
+                    );
+                }).reverse()}
+            </View>
+        );
+    };
+
+    const renderCardContent = () => {
+        if (activeTab === 'circles') {
+            return renderCirclesComingSoon();
+        }
+
+        if (viewMode === 'messages') {
+            return renderRecentChats();
+        }
+
+        return (
+            <View style={styles.cardsContainer}>
+                {availablePals.length > 0 ? (
+                    renderCardStack()
+                ) : (
+                    renderNoMoreCards()
+                )}
+            </View>
+        );
     };
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <Screen>
-                {/* Top Toggle Bar */}
+            <ImageBackground source={BG_PAL} style={styles.container} resizeMode="cover">
+                {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.headerContent}>
-                        <View style={{ width: 40 }} />
-                        <View style={styles.toggleContainer}>
+                        {/* Left side - View toggle button (icon only) */}
+                        {activeTab !== 'circles' && (
                             <TouchableOpacity
-                                style={[styles.toggleBtn, activeTab === 'buddy' && styles.activeToggle]}
-                                onPress={() => setActiveTab('buddy')}
+                                style={[
+                                    styles.viewToggleButton,
+                                    viewMode === 'messages' && styles.viewToggleButtonActive
+                                ]}
+                                onPress={toggleViewMode}
                             >
-                                <Text style={[styles.toggleText, activeTab === 'buddy' && styles.activeToggleText]}>Buddy</Text>
+                                {viewMode === 'cards' ? (
+                                    <MessageCircle size={20} color={colors.textPrimary} />
+                                ) : (
+                                    <Layers size={20} color={colors.accent} />
+                                )}
+                            </TouchableOpacity>
+                        )}
+                        {activeTab === 'circles' && <View style={{ width: 44 }} />}
+
+                        {/* Center - Tab navigation with icons */}
+                        <BlurView intensity={40} tint="light" style={styles.tabContainer}>
+                            <TouchableOpacity
+                                style={[styles.tabButton, activeTab === 'pal' && styles.activeTabButton]}
+                                onPress={() => setActiveTab('pal')}
+                            >
+                                {activeTab === 'pal' ? (
+                                    <Text style={styles.activeTabText}>Pal</Text>
+                                ) : (
+                                    <User size={20} color={colors.textSecondary} />
+                                )}
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={[styles.toggleBtn, activeTab === 'mentor' && styles.activeToggle]}
+                                style={[styles.tabButton, activeTab === 'mentor' && styles.activeTabButton]}
                                 onPress={() => setActiveTab('mentor')}
                             >
-                                <Text style={[styles.toggleText, activeTab === 'mentor' && styles.activeToggleText]}>Mentoring</Text>
+                                {activeTab === 'mentor' ? (
+                                    <Text style={styles.activeTabText}>Mentor</Text>
+                                ) : (
+                                    <Sparkles size={20} color={colors.textSecondary} />
+                                )}
                             </TouchableOpacity>
-                        </View>
+                            <TouchableOpacity
+                                style={[styles.tabButton, activeTab === 'circles' && styles.activeTabButton]}
+                                onPress={() => setActiveTab('circles')}
+                            >
+                                {activeTab === 'circles' ? (
+                                    <Text style={styles.activeTabText}>Circles</Text>
+                                ) : (
+                                    <Users size={20} color={colors.textSecondary} />
+                                )}
+                            </TouchableOpacity>
+                        </BlurView>
+
+                        {/* Right side - Profile button */}
                         <ProfileButton />
                     </View>
                 </View>
 
-                {/* Swipe Stack */}
-                <View style={styles.stackContainer}>
-                    {currentStack.length > 0 ? (
-                        currentStack
-                            .map((item, index) => {
-                                if (index > 2) return null;
-                                return (
-                                    <SwipeCard
-                                        key={item.id}
-                                        ref={index === 0 ? topCardRef : null}
-                                        item={item}
-                                        onSwipeLeft={handleSwipe}
-                                        onSwipeRight={handleSwipe}
-                                    />
-                                );
-                            })
-                            .reverse()
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyText}>No more {activeTab === 'buddy' ? 'buddies' : 'mentors'} for today.</Text>
-                        </View>
-                    )}
-                </View>
-
-                {currentStack.length > 0 && (
-                    <View style={styles.actionButtonsContainer}>
-                        <TouchableOpacity style={[styles.actionButton, styles.nopeButton]} onPress={() => topCardRef.current?.swipeLeft()}>
-                            <X size={32} color="#EF4444" />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.actionButton, styles.likeButton]} onPress={() => topCardRef.current?.swipeRight()}>
-                            <Check size={32} color="#4ADE80" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {/* Messages Section */}
-                <View style={styles.messagesSection}>
-                    <Text style={styles.sectionTitle}>Recent Chats</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.messagesList}>
-                        {MESSAGES.map((msg) => (
-                            <TouchableOpacity
-                                key={msg.id}
-                                style={styles.messageItem}
-                                onPress={() => router.push({ pathname: '/chat-detail', params: { id: msg.id, name: msg.name } })}
-                            >
-                                <View style={styles.avatar}>
-                                    <Text style={styles.avatarText}>{msg.name[0]}</Text>
-                                </View>
-                                <View style={styles.messageContent}>
-                                    <Text style={styles.messageName}>{msg.name}</Text>
-                                    <Text style={styles.messagePreview} numberOfLines={1}>{msg.message}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-            </Screen>
+                {/* Content */}
+                {renderCardContent()}
+            </ImageBackground>
         </GestureHandlerRootView>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     header: {
         paddingHorizontal: layout.spacing.lg,
-        paddingTop: layout.spacing.sm,
+        paddingTop: 60,
         paddingBottom: layout.spacing.sm,
         zIndex: 10,
     },
@@ -173,138 +566,440 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    toggleContainer: {
+    viewToggleButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: colors.glass,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.glassBorder,
+    },
+    viewToggleButtonActive: {
+        backgroundColor: colors.glassOverlay,
+        borderColor: colors.accent,
+    },
+    tabContainer: {
         flexDirection: 'row',
-        backgroundColor: colors.surface,
         padding: 4,
         borderRadius: layout.borderRadius.xl,
         borderWidth: 1,
-        borderColor: colors.borderDark,
-        width: 240,
-        alignSelf: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        borderColor: colors.glassBorder,
+        overflow: 'hidden',
     },
-    toggleBtn: {
-        flex: 1,
-        paddingVertical: 8,
+    tabButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 16,
         alignItems: 'center',
-        borderRadius: layout.borderRadius.md,
-    },
-    activeToggle: {
-        backgroundColor: colors.primary,
-    },
-    toggleText: {
-        fontWeight: typography.weight.medium as any,
-        color: colors.textSecondary,
-        fontSize: typography.size.sm,
-    },
-    activeToggleText: {
-        color: colors.surface,
-        fontWeight: typography.weight.bold as any,
-    },
-    messagesSection: {
-        paddingHorizontal: layout.spacing.lg,
-        paddingBottom: TAB_BAR_HEIGHT + layout.spacing.md,
-        marginTop: 'auto',
-    },
-    sectionTitle: {
-        fontSize: typography.size.sm,
-        fontWeight: typography.weight.bold as any,
-        color: colors.textSecondary,
-        marginBottom: layout.spacing.sm,
-        textTransform: 'uppercase',
-        letterSpacing: 1,
-    },
-    messagesList: {
-        gap: layout.spacing.md,
-        paddingRight: layout.spacing.lg,
-    },
-    messageItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.surface,
-        padding: 8,
+        justifyContent: 'center',
         borderRadius: layout.borderRadius.lg,
-        gap: 10,
-        width: 200,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        minWidth: 50,
     },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.primaryLight,
+    activeTabButton: {
+        backgroundColor: colors.textPrimary,
+        paddingHorizontal: 20,
+    },
+    activeTabText: {
+        fontSize: typography.size.sm,
+        fontWeight: '600',
+        color: '#FFFFFF',
+    },
+    // Cards Container
+    cardsContainer: {
+        flex: 1,
+        paddingBottom: TAB_BAR_HEIGHT,
+    },
+    // Card stack wrapper
+    cardStackWrapper: {
+        flex: 1,
+        position: 'relative',
+    },
+    // Background card styles for stacked cards
+    backgroundCard: {
+        position: 'absolute',
+        top: 0,
+        left: layout.spacing.md,
+        right: layout.spacing.md,
+        bottom: layout.spacing.md,
+        borderRadius: layout.borderRadius.xl,
+        overflow: 'hidden',
+        backgroundColor: colors.surface,
+    },
+    backgroundCardGradient: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        paddingHorizontal: layout.spacing.lg,
+        paddingBottom: 100,
+    },
+    backgroundCardName: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: colors.textPrimary,
+        opacity: 0.6,
+    },
+    // Pal Card Styles
+    palCardContainer: {
+        position: 'absolute',
+        top: 0,
+        left: layout.spacing.md,
+        right: layout.spacing.md,
+        bottom: layout.spacing.md,
+        borderRadius: layout.borderRadius.xl,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 24,
+        elevation: 10,
+        zIndex: 10,
+        backgroundColor: colors.surface,
+    },
+    palCardBackground: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    swipeOverlay: {
+        ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 100,
     },
-    avatarText: {
-        fontSize: typography.size.md,
+    likeOverlay: {
+        backgroundColor: 'rgba(154, 184, 154, 0.3)',
+    },
+    nopeOverlay: {
+        backgroundColor: 'rgba(212, 165, 165, 0.3)',
+    },
+    swipeStamp: {
+        borderWidth: 4,
+        borderRadius: 12,
+        padding: 16,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+    },
+    swipeStampTextLike: {
+        fontSize: 28,
         fontWeight: 'bold',
-        color: colors.primary,
+        color: colors.success,
+        letterSpacing: 3,
     },
-    messageContent: {
-        flex: 1,
+    swipeStampTextNope: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: colors.error,
+        letterSpacing: 3,
     },
-    messageName: {
+    palCardTopBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: layout.spacing.md,
+        paddingTop: layout.spacing.md,
+    },
+    availabilityBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 20,
+        overflow: 'hidden',
+    },
+    availabilityDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+    },
+    availabilityText: {
         fontSize: typography.size.sm,
+        fontWeight: '500',
+        color: colors.textPrimary,
+    },
+    mutualConnectionsContainer: {
+        position: 'absolute',
+        right: layout.spacing.md,
+        top: '40%',
+        alignItems: 'center',
+    },
+    mutualAvatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        borderWidth: 3,
+        borderColor: '#FFF',
+    },
+    palCardBottomGradient: {
+        paddingHorizontal: layout.spacing.lg,
+        paddingTop: 60,
+        paddingBottom: layout.spacing.lg,
+    },
+    ratingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-end',
+        gap: 4,
+        marginBottom: 8,
+    },
+    ratingLeaf: {
+        fontSize: 16,
+    },
+    ratingValue: {
+        fontSize: typography.size.lg,
         fontWeight: 'bold',
         color: colors.textPrimary,
     },
-    messagePreview: {
-        fontSize: 11,
+    ratingLabel: {
+        fontSize: typography.size.xs,
         color: colors.textSecondary,
     },
-    stackContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: -20,
+    palName: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: colors.textPrimary,
+        marginBottom: layout.spacing.md,
     },
-    emptyState: {
-        padding: layout.spacing.xl,
-        alignItems: 'center',
+    infoChipsContainer: {
+        gap: 8,
+        marginBottom: layout.spacing.lg,
     },
-    emptyText: {
-        fontSize: typography.size.md,
-        color: colors.textSecondary,
-        textAlign: 'center',
+    infoChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.glass,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 16,
+        alignSelf: 'flex-start',
+    },
+    infoChipIcon: {
+        fontSize: 16,
+    },
+    infoChipText: {
+        fontSize: typography.size.sm,
+        color: colors.textPrimary,
+        fontWeight: '500',
     },
     actionButtonsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 40,
-        marginBottom: 20,
+        gap: 24,
+        marginTop: layout.spacing.md,
     },
-    actionButton: {
+    rejectButton: {
         width: 64,
         height: 64,
         borderRadius: 32,
-        backgroundColor: colors.surface,
+        backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
+        shadowRadius: 10,
+        elevation: 5,
         borderWidth: 1,
         borderColor: colors.borderDark,
     },
-    nopeButton: {
-        borderColor: '#EF4444',
+    acceptButton: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: colors.accent,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: colors.accent,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 15,
+        elevation: 8,
     },
-    likeButton: {
-        borderColor: '#4ADE80',
+    // No more cards state
+    noMoreCardsContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: layout.spacing.xl,
+    },
+    noMoreCardsCard: {
+        padding: layout.spacing.xl,
+        borderRadius: layout.borderRadius.lg,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.glassBorder,
+        overflow: 'hidden',
+    },
+    noMoreCardsEmoji: {
+        fontSize: 64,
+        marginBottom: layout.spacing.lg,
+    },
+    noMoreCardsTitle: {
+        fontSize: typography.size.xl,
+        fontWeight: 'bold',
+        color: colors.textPrimary,
+        marginBottom: layout.spacing.sm,
+    },
+    noMoreCardsSubtitle: {
+        fontSize: typography.size.md,
+        color: colors.textSecondary,
+        textAlign: 'center',
+        marginBottom: layout.spacing.lg,
+    },
+    resetButton: {
+        backgroundColor: colors.textPrimary,
+        paddingHorizontal: 32,
+        paddingVertical: 14,
+        borderRadius: layout.borderRadius.xl,
+    },
+    resetButtonText: {
+        fontSize: typography.size.md,
+        fontWeight: '600',
+        color: '#FFF',
+    },
+    // Recent Chats Styles
+    recentChatsContainer: {
+        flex: 1,
+        paddingHorizontal: layout.spacing.lg,
+    },
+    recentChatsHeader: {
+        paddingVertical: layout.spacing.md,
+    },
+    recentChatsTitle: {
+        fontSize: typography.size.lg,
+        fontWeight: '600',
+        color: colors.textPrimary,
+    },
+    chatsList: {
+        flex: 1,
+    },
+    chatsListContent: {
+        paddingBottom: TAB_BAR_HEIGHT + layout.spacing.lg,
+        gap: layout.spacing.sm,
+    },
+    chatItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: layout.spacing.md,
+        backgroundColor: colors.glass,
+        borderRadius: layout.borderRadius.lg,
+        borderWidth: 1,
+        borderColor: colors.glassBorder,
+    },
+    chatAvatar: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        marginRight: layout.spacing.md,
+    },
+    chatContent: {
+        flex: 1,
+    },
+    chatHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    chatName: {
+        fontSize: typography.size.md,
+        fontWeight: '600',
+        color: colors.textPrimary,
+    },
+    chatTime: {
+        fontSize: typography.size.xs,
+        color: colors.textSecondary,
+    },
+    chatMessage: {
+        fontSize: typography.size.sm,
+        color: colors.textSecondary,
+    },
+    unreadBadge: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: colors.accent,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: layout.spacing.sm,
+    },
+    unreadText: {
+        fontSize: typography.size.xs,
+        fontWeight: 'bold',
+        color: '#FFF',
+    },
+    // Coming Soon styles
+    comingSoonContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: layout.spacing.lg,
+        paddingBottom: TAB_BAR_HEIGHT,
+    },
+    comingSoonCard: {
+        width: '100%',
+        borderRadius: layout.borderRadius.lg,
+        padding: layout.spacing.xl,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.glassBorder,
+        overflow: 'hidden',
+    },
+    comingSoonIconContainer: {
+        marginBottom: layout.spacing.lg,
+    },
+    comingSoonIconBg: {
+        width: 96,
+        height: 96,
+        borderRadius: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    comingSoonTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: colors.textPrimary,
+        marginBottom: 4,
+    },
+    comingSoonSubtitle: {
+        fontSize: typography.size.md,
+        fontWeight: '600',
+        color: colors.accent,
+        marginBottom: layout.spacing.md,
+    },
+    comingSoonDescription: {
+        fontSize: typography.size.md,
+        color: colors.textSecondary,
+        textAlign: 'center',
+        lineHeight: 22,
+        marginBottom: layout.spacing.lg,
+    },
+    comingSoonFeatures: {
+        width: '100%',
+        gap: 12,
+        marginBottom: layout.spacing.lg,
+    },
+    featureItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        backgroundColor: colors.glassOverlay,
+        padding: 12,
+        borderRadius: layout.borderRadius.md,
+    },
+    featureText: {
+        fontSize: typography.size.md,
+        color: colors.textPrimary,
+    },
+    notifyButton: {
+        backgroundColor: colors.textPrimary,
+        paddingHorizontal: 32,
+        paddingVertical: 14,
+        borderRadius: layout.borderRadius.xl,
+    },
+    notifyButtonText: {
+        fontSize: typography.size.md,
+        fontWeight: '600',
+        color: '#FFF',
     },
 });

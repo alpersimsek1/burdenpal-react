@@ -1,20 +1,49 @@
 export const colors = {
-  // Brand Colors
-  primary: '#0F766E', // Teal 700 - Calming, trustworthy
-  primaryLight: '#2DD4BF', // Teal 400 - Approachable
-  accent: '#F43F5E', // Rose 500 - Warmth, "Pal" aspect (heart)
+  // Brand Colors - Modern cream/beige palette
+  primary: '#2D2A26', // Dark charcoal for contrast
+  primaryLight: '#E8DED5', // Warm cream
+  accent: '#D4A574', // Warm gold accent
 
-  // Neutral Colors
-  background: '#F8FAFC',
+  // Background Colors
+  background: '#FAFAFA', // Clean off-white
+  backgroundWarm: '#F5EDE6', // Warm cream background
   surface: '#FFFFFF',
-  glass: 'rgba(255, 255, 255, 0.7)',
-  glassDark: 'rgba(15, 118, 110, 0.1)',
-  textPrimary: '#1E293B',
-  textSecondary: '#64748B',
-  border: 'rgba(255, 255, 255, 0.5)',
-  borderDark: '#E2E8F0',
+  surfaceWarm: '#FAF7F4', // Subtle warm surface
+
+  // Gradient Colors (for LinearGradient)
+  gradientStart: '#F5EDE6', // Warm cream
+  gradientMid: '#F0E6E0', // Soft blush
+  gradientEnd: '#EDE4F3', // Soft lavender
+
+  // Glassmorphism
+  glass: 'rgba(255, 255, 255, 0.75)',
+  glassDark: 'rgba(255, 255, 255, 0.5)',
+  glassBorder: 'rgba(255, 255, 255, 0.6)',
+  glassOverlay: 'rgba(245, 237, 230, 0.4)',
+
+  // Text Colors
+  textPrimary: '#2D2A26', // Warm charcoal
+  textSecondary: '#8A8580', // Warm gray
+  textLight: '#B5B0A8', // Light warm gray
+
+  // Border Colors
+  border: 'rgba(45, 42, 38, 0.08)',
+  borderDark: '#E8E3DB',
+  borderLight: 'rgba(255, 255, 255, 0.5)',
+
+  // Semantic Colors - Muted, calm tones
+  success: '#9AB89A', // Soft sage
+  error: '#D4A5A5', // Soft rose
+  warning: '#DBC5A0', // Soft gold
+
+  // Mood Colors (for feeling selector)
+  moodGreat: '#A8C5A8', // Soft green
+  moodGood: '#B8D4B8', // Light sage
+  moodOkay: '#D4C5A5', // Soft amber
+  moodLow: '#D4B8A5', // Soft peach
+  moodStruggling: '#D4A5B8', // Soft pink
 
   // iOS 26 "Liquid Glass" accents
-  liquidGlass: 'rgba(255, 255, 255, 0.4)',
-  refraction: 'rgba(255, 255, 255, 0.8)',
+  liquidGlass: 'rgba(255, 255, 255, 0.6)',
+  refraction: 'rgba(255, 255, 255, 0.9)',
 };

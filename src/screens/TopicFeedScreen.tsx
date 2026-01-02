@@ -1,126 +1,122 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, MessageSquare, ArrowBigUp, MoreHorizontal } from 'lucide-react-native';
-import { Screen } from '../components/Screen';
-import { Card } from '../components/Card';
+import { ArrowBigUp, MessageSquare, MoreHorizontal } from 'lucide-react-native';
+import React from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { POSTS } from '../data/communityData';
+import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
-import { colors } from '../theme/colors';
-import { POSTS, COMMUNITIES } from '../data/communityData';
+
+const TAB_BAR_HEIGHT = 100;
 
 export function TopicFeedScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute();
     const { communityId, communityName, communityColor } = route.params as any;
 
+    // Set the navigation title to the topic name
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            title: communityName,
+            headerTitle: () => (
+                <View style={styles.headerTitleContainer}>
+                    <View style={[styles.communityDot, { backgroundColor: communityColor }]} />
+                    <Text style={styles.navTitle}>{communityName}</Text>
+                </View>
+            ),
+        });
+    }, [navigation, communityName, communityColor]);
+
     const filteredPosts = POSTS.filter(p => p.community === communityName);
 
     const renderPost = ({ item }: { item: typeof POSTS[0] }) => (
         <TouchableOpacity
-            activeOpacity={0.9}
+            activeOpacity={0.7}
             onPress={() => navigation.navigate('PostDetail', {
                 post: item,
                 communityColor: communityColor
             })}
+            style={styles.postContainer}
         >
-            <Card style={styles.postCard}>
-                <View style={styles.postHeader}>
-                    <View style={styles.metaLeft}>
-                        <Text style={styles.metaText}>Posted by {item.author} • {item.time}</Text>
-                    </View>
-                    <MoreHorizontal size={16} color={colors.textSecondary} />
+            {/* Header */}
+            <View style={styles.postHeader}>
+                <Text style={styles.authorText}>Posted by {item.author} • {item.time}</Text>
+                <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <MoreHorizontal size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+            </View>
+
+            {/* Title */}
+            <Text style={styles.postTitle}>{item.title}</Text>
+
+            {/* Body */}
+            <Text style={styles.postBody}>{item.body}</Text>
+
+            {/* Actions */}
+            <View style={styles.actionsRow}>
+                <View style={styles.actionItem}>
+                    <ArrowBigUp size={20} color={colors.textSecondary} />
+                    <Text style={styles.actionCount}>{item.upvotes}</Text>
                 </View>
-
-                <Text style={styles.postTitle}>{item.title}</Text>
-                <Text style={styles.postBody}>{item.body}</Text>
-
-                <View style={styles.postFooter}>
-                    <View style={styles.actionButton}>
-                        <ArrowBigUp size={20} color={colors.textSecondary} />
-                        <Text style={styles.actionText}>{item.upvotes}</Text>
-                    </View>
-
-                    <View style={styles.actionButton}>
-                        <MessageSquare size={18} color={colors.textSecondary} />
-                        <Text style={styles.actionText}>{item.comments}</Text>
-                    </View>
+                <View style={styles.actionItem}>
+                    <MessageSquare size={18} color={colors.textSecondary} />
+                    <Text style={styles.actionCount}>{item.comments}</Text>
                 </View>
-            </Card>
+            </View>
         </TouchableOpacity>
     );
 
     return (
-        <Screen>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <ArrowLeft size={24} color={colors.textPrimary} />
-                </TouchableOpacity>
-                <View style={styles.headerTitleContainer}>
-                    <View style={[styles.dot, { backgroundColor: communityColor }]} />
-                    <Text style={styles.headerTitle}>{communityName}</Text>
-                </View>
-                <View style={{ width: 24 }} />
-            </View>
-
+        <View style={styles.container}>
             <FlatList
                 data={filteredPosts}
                 renderItem={renderPost}
                 keyExtractor={item => item.id}
                 contentContainerStyle={styles.feed}
                 showsVerticalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>No posts yet in {communityName}.</Text>
+                        <Text style={styles.emptySubtext}>Be the first to start a conversation!</Text>
                     </View>
                 }
             />
-        </Screen>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: layout.spacing.lg,
-        paddingTop: layout.spacing.sm,
-        paddingBottom: layout.spacing.md,
-    },
-    backButton: {
-        padding: 4,
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
     },
     headerTitleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
     },
-    dot: {
+    communityDot: {
         width: 10,
         height: 10,
         borderRadius: 5,
     },
-    headerTitle: {
+    navTitle: {
         fontSize: typography.size.lg,
         fontWeight: 'bold',
         color: colors.textPrimary,
     },
     feed: {
-        paddingBottom: layout.spacing.xl,
+        paddingBottom: TAB_BAR_HEIGHT,
     },
-    postCard: {
-        marginHorizontal: layout.spacing.lg,
-        marginBottom: layout.spacing.md,
-        borderRadius: layout.borderRadius.md,
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
+    separator: {
+        height: 1,
+        backgroundColor: colors.borderDark,
+    },
+    postContainer: {
+        paddingHorizontal: layout.spacing.lg,
+        paddingVertical: layout.spacing.lg,
+        backgroundColor: colors.background,
     },
     postHeader: {
         flexDirection: 'row',
@@ -128,20 +124,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: layout.spacing.sm,
     },
-    metaLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    metaText: {
-        fontSize: 11,
+    authorText: {
+        fontSize: 13,
         color: colors.textSecondary,
     },
     postTitle: {
-        fontSize: typography.size.lg,
+        fontSize: typography.size.xl,
         fontWeight: 'bold',
         color: colors.textPrimary,
-        marginBottom: layout.spacing.xs,
-        lineHeight: 24,
+        marginBottom: layout.spacing.sm,
+        lineHeight: 28,
     },
     postBody: {
         fontSize: typography.size.md,
@@ -149,25 +141,17 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         marginBottom: layout.spacing.md,
     },
-    postFooter: {
+    actionsRow: {
         flexDirection: 'row',
         gap: 20,
-        borderTopWidth: 1,
-        borderTopColor: colors.borderDark + '40',
-        paddingTop: layout.spacing.sm,
     },
-    actionButton: {
+    actionItem: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        backgroundColor: colors.background,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
     },
-    actionText: {
-        fontSize: 12,
-        fontWeight: '600',
+    actionCount: {
+        fontSize: 14,
         color: colors.textSecondary,
     },
     emptyContainer: {
@@ -175,7 +159,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     emptyText: {
+        color: colors.textPrimary,
+        fontSize: typography.size.lg,
+        fontWeight: '600',
+    },
+    emptySubtext: {
         color: colors.textSecondary,
         fontSize: typography.size.md,
+        marginTop: 4,
     },
 });

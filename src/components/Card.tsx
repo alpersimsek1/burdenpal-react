@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet, ViewStyle, ViewProps, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
+import React from 'react';
+import { StyleSheet, View, ViewProps, ViewStyle } from 'react-native';
 import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 
@@ -8,9 +8,18 @@ interface CardProps extends ViewProps {
     children: React.ReactNode;
     style?: ViewStyle;
     intensity?: number;
+    variant?: 'default' | 'glass' | 'solid';
 }
 
-export function Card({ children, style, intensity = 60, ...props }: CardProps) {
+export function Card({ children, style, intensity = 50, variant = 'glass', ...props }: CardProps) {
+    if (variant === 'solid') {
+        return (
+            <View style={[styles.solidCard, style]} {...props}>
+                {children}
+            </View>
+        );
+    }
+
     return (
         <BlurView
             intensity={intensity}
@@ -27,11 +36,18 @@ export function Card({ children, style, intensity = 60, ...props }: CardProps) {
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: layout.borderRadius.xl,
+        borderRadius: layout.borderRadius.lg,
         overflow: 'hidden',
-        borderWidth: 1.5,
-        borderColor: colors.border,
-        backgroundColor: colors.liquidGlass,
+        borderWidth: 1,
+        borderColor: colors.glassBorder,
+        backgroundColor: colors.glass,
+    },
+    solidCard: {
+        borderRadius: layout.borderRadius.lg,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.borderDark,
+        padding: layout.spacing.md,
     },
     innerContent: {
         flex: 1,

@@ -1,19 +1,19 @@
+import { MapPin } from 'lucide-react-native';
 import React, { forwardRef, useImperativeHandle } from 'react';
-import { StyleSheet, View, Text, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-    interpolate,
     Extrapolation,
+    interpolate,
     runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
 } from 'react-native-reanimated';
-import { MapPin } from 'lucide-react-native';
-import { Card } from './Card';
+import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
-import { colors } from '../theme/colors';
+import { Card } from './Card';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     role: {
         fontSize: typography.size.md,
         fontWeight: typography.weight.medium as any,
-        color: colors.primary,
+        color: colors.accent,
     },
     row: {
         flexDirection: 'row',
@@ -201,8 +201,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 16,
+        backgroundColor: colors.glassOverlay,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.glassBorder,
     },
     tagText: {
         fontSize: typography.size.xs,
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: colors.border,
+        backgroundColor: colors.borderDark,
         opacity: 0.5,
         marginVertical: layout.spacing.sm,
     },
@@ -224,30 +225,31 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 30,
         zIndex: 100,
-        borderWidth: 4,
+        borderWidth: 3,
         borderRadius: 8,
         padding: 10,
+        backgroundColor: colors.glass,
     },
     likeStamp: {
         right: 20,
-        borderColor: '#4ADE80',
+        borderColor: colors.success,
         transform: [{ rotate: '-15deg' }],
     },
     nopeStamp: {
         left: 20,
-        borderColor: '#EF4444',
+        borderColor: colors.error,
         transform: [{ rotate: '15deg' }],
     },
     likeText: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: 'bold',
-        color: '#4ADE80',
+        color: colors.success,
         letterSpacing: 2,
     },
     nopeText: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: 'bold',
-        color: '#EF4444',
+        color: colors.error,
         letterSpacing: 2,
     },
 });

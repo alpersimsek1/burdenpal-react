@@ -9,14 +9,14 @@ import { DynamicColorIOS, Platform } from 'react-native';
  * SF Symbols are used for iOS icons, which automatically adapt to the liquid glass styling.
  */
 export default function TabLayout() {
-    // Dynamic color for liquid glass - automatically adapts to light/dark backgrounds
+    // Dynamic color for liquid glass - warm cream tones for modern look
     const dynamicTintColor = Platform.OS === 'ios'
-        ? DynamicColorIOS({ dark: '#FFFFFF', light: '#007AFF' })
-        : '#007AFF';
+        ? DynamicColorIOS({ dark: '#FAF7F4', light: '#D4A574' })
+        : '#D4A574';
 
     const dynamicLabelColor = Platform.OS === 'ios'
-        ? DynamicColorIOS({ dark: '#FFFFFF', light: '#000000' })
-        : '#000000';
+        ? DynamicColorIOS({ dark: '#FAF7F4', light: '#2D2A26' })
+        : '#2D2A26';
 
     return (
         <NativeTabs
@@ -26,9 +26,9 @@ export default function TabLayout() {
                 color: dynamicLabelColor,
             }}
         >
-            {/* Buddy Tab - using person.2 SF Symbol */}
+            {/* Pal Tab - using person.2 SF Symbol */}
             <NativeTabs.Trigger name="index">
-                <Label>Buddy</Label>
+                <Label>Pal</Label>
                 <Icon
                     sf={{ default: 'person.2', selected: 'person.2.fill' }}
                     drawable="ic_group"
@@ -44,9 +44,9 @@ export default function TabLayout() {
                 />
             </NativeTabs.Trigger>
 
-            {/* Community Tab - using bubble.left.and.bubble.right SF Symbol */}
+            {/* Spaces Tab - using bubble.left.and.bubble.right SF Symbol */}
             <NativeTabs.Trigger name="community">
-                <Label>Community</Label>
+                <Label>Spaces</Label>
                 <Icon
                     sf={{ default: 'bubble.left.and.bubble.right', selected: 'bubble.left.and.bubble.right.fill' }}
                     drawable="ic_forum"
