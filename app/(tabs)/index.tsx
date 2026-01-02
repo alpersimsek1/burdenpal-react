@@ -1,9 +1,9 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Bell, Heart, Layers, MessageCircle, Sparkles, User, Users, X } from 'lucide-react-native';
+import { Bell, Layers, MessageCircle, Sparkles, User, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Dimensions, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
     Extrapolation,
@@ -28,13 +28,22 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 const MOCK_PALS = [
     {
         id: '1',
-        name: 'Sarah Chen',
+        name: 'SARAH CHEN',
+        age: 24,
         avatar: require('../../assets/avatars/female1.png'),
+        image: require('../../assets/feelings/lost.png'),
         isAvailable: true,
         rating: 4.8,
-        feeling: 'Hopeful & Curious',
-        hobbies: 'Hiking • Photography • Cooking',
-        ideals: 'Growth mindset • Authenticity • Kindness',
+        feelings: [
+            { keyword: 'Lost.', description: "Don't know which way to go" },
+            { keyword: 'Stuck.', description: "I feel stuck" },
+            { keyword: 'Stuck.', description: "I feel stuck" }
+        ],
+        bio: "I feel like I'm standing at a crossroads in the fog.",
+        color: '#2F5266', // Deep Teal
+        accent: '#5C8D9E',
+        hobbies: 'Hiking • Photography',
+        ideals: 'Growth • Authenticity',
         mutualConnections: [
             require('../../assets/avatars/male1.png'),
             require('../../assets/avatars/male2.png'),
@@ -42,45 +51,96 @@ const MOCK_PALS = [
     },
     {
         id: '2',
-        name: 'Marcus Johnson',
+        name: 'MARCUS JOHNSON',
+        age: 29,
         avatar: require('../../assets/avatars/male1.png'),
+        image: require('../../assets/feelings/overwhelmed.png'),
         isAvailable: true,
         rating: 4.9,
-        feeling: 'Peaceful & Content',
-        hobbies: 'Music • Reading • Yoga',
-        ideals: 'Compassion • Balance • Learning',
+        feelings: [
+            { keyword: 'Heavy.', description: "Everything feels a bit too much" }
+        ],
+        bio: "The weight of expectations is crushing me lately. I'm carrying everyone else's problems and forgetting how to handle my own.",
+        color: '#9E5A5A', // Muted Red
+        accent: '#D18C8C',
+        hobbies: 'Music • Yoga',
+        ideals: 'Balance • Compassion',
         mutualConnections: [
             require('../../assets/avatars/female1.png'),
-            require('../../assets/avatars/female2.png'),
         ]
     },
     {
         id: '3',
-        name: 'Emma Williams',
+        name: 'EMMA WILLIAMS',
+        age: 26,
         avatar: require('../../assets/avatars/female2.png'),
+        image: require('../../assets/feelings/hollow.png'),
         isAvailable: false,
         rating: 4.7,
-        feeling: 'Energetic & Inspired',
-        hobbies: 'Painting • Dancing • Traveling',
-        ideals: 'Creativity • Adventure • Connection',
-        mutualConnections: [
-            require('../../assets/avatars/male1.png'),
-            require('../../assets/avatars/female1.png'),
-        ]
+        feelings: [
+            { keyword: 'Hollow.', description: "I feel lonely" }
+        ],
+        bio: "Waking up feels like climbing a mountain every single day. I just want to find a reason to smile again genuinely.",
+        color: '#5D5C8D', // Muted Purple
+        accent: '#8E8DB6',
+        hobbies: 'Painting • Reading',
+        ideals: 'Connection • Peace',
+        mutualConnections: []
     },
     {
         id: '4',
-        name: 'David Kim',
+        name: 'DAVID KIM',
+        age: 31,
         avatar: require('../../assets/avatars/male2.png'),
+        image: require('../../assets/feelings/calm.png'),
         isAvailable: true,
         rating: 5.0,
-        feeling: 'Calm & Reflective',
-        hobbies: 'Meditation • Writing • Chess',
-        ideals: 'Wisdom • Patience • Empathy',
-        mutualConnections: [
-            require('../../assets/avatars/female2.png'),
-            require('../../assets/avatars/male1.png'),
-        ]
+        feelings: [
+            { keyword: 'Stable.', description: "I'm okay but want to talk" }
+        ],
+        bio: "I've found some ground recently, but I want to ensure I don't lose it. Looking for meaningful conversations to keep grounded.",
+        color: '#3EC5A7', // Palette Green
+        accent: '#84DCC8',
+        hobbies: 'Meditation • Chess',
+        ideals: 'Wisdom • Patience',
+        mutualConnections: []
+    },
+    {
+        id: '5',
+        name: 'OLIVIA BROWN',
+        age: 27,
+        avatar: require('../../assets/avatars/female1.png'),
+        image: require('../../assets/feelings/lonely.png'),
+        isAvailable: true,
+        rating: 4.9,
+        feelings: [
+            { keyword: 'Lonely.', description: "I feel lonely" }
+        ],
+        bio: "Surrounded by people but feeling completely disconnected. I miss having a real, raw connection with someone.",
+        color: '#2F3A56', // Deep Navy
+        accent: '#5F6C80',
+        hobbies: 'Gardening • Baking',
+        ideals: 'Hope • Patience',
+        mutualConnections: []
+    },
+    {
+        id: '6',
+        name: 'JAMES WILSON',
+        age: 22,
+        avatar: require('../../assets/avatars/male1.png'),
+        image: require('../../assets/feelings/stuck.png'),
+        isAvailable: true,
+        rating: 4.6,
+        feelings: [
+            { keyword: 'Stuck.', description: "I feel stuck" },
+            { keyword: 'Tired.', description: "Mentally tired" }
+        ],
+        bio: "I'm spinning my wheels and going nowhere.",
+        color: '#D6B07C', // Warm Gold
+        accent: '#EED9B8',
+        hobbies: 'Gaming • Movies',
+        ideals: 'Focus • Balance',
+        mutualConnections: []
     },
 ];
 
@@ -153,7 +213,7 @@ function SwipeablePalCard({
         const rotate = interpolate(
             translateX.value,
             [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-            [-15, 0, 15],
+            [-10, 0, 10],
             Extrapolation.CLAMP
         );
         return {
@@ -169,7 +229,7 @@ function SwipeablePalCard({
         const opacity = interpolate(
             translateX.value,
             [0, SCREEN_WIDTH / 4],
-            [0, 0.8],
+            [0, 1],
             Extrapolation.CLAMP
         );
         return { opacity };
@@ -179,7 +239,7 @@ function SwipeablePalCard({
         const opacity = interpolate(
             translateX.value,
             [-SCREEN_WIDTH / 4, 0],
-            [0.8, 0],
+            [1, 0],
             Extrapolation.CLAMP
         );
         return { opacity };
@@ -191,81 +251,84 @@ function SwipeablePalCard({
         });
     };
 
-    const handleButtonSwipeRight = () => {
-        translateX.value = withTiming(SCREEN_WIDTH * 1.5, { duration: 250 }, () => {
-            runOnJS(onSwipeRight)();
-        });
-    };
+    // Use solid color
+    const cardColor = (pal as any).color || '#2F5266';
+    const cardAccent = (pal as any).accent || 'rgba(255,255,255,0.2)';
 
     return (
         <GestureDetector gesture={gesture}>
             <Animated.View style={[styles.palCardContainer, animatedCardStyle]}>
-                <ImageBackground
-                    source={pal.avatar}
-                    style={styles.palCardBackground}
-                    resizeMode="cover"
-                >
+                <View style={[styles.palCardBackground, { backgroundColor: cardColor }]}>
+
+                    {/* Top Image Placeholder Area (45%) */}
+                    <View style={styles.cardImagePlaceholder}>
+                        <Image
+                            source={(pal as any).image}
+                            style={styles.cardImage}
+                            resizeMode="cover"
+                        />
+                        <LinearGradient
+                            colors={['transparent', cardColor]}
+                            style={styles.imageGradientOverlay}
+                            start={{ x: 0, y: 0.3 }}
+                            end={{ x: 0, y: 1 }}
+                        />
+                    </View>
+
                     {/* Like overlay */}
                     <Animated.View style={[styles.swipeOverlay, styles.likeOverlay, likeOverlayStyle]}>
-                        <View style={styles.swipeStamp}>
-                            <Text style={styles.swipeStampTextLike}>CONNECT</Text>
-                        </View>
+                        <Text style={styles.swipeStampTextLike}>SAME HERE</Text>
                     </Animated.View>
 
                     {/* Nope overlay */}
                     <Animated.View style={[styles.swipeOverlay, styles.nopeOverlay, nopeOverlayStyle]}>
-                        <View style={styles.swipeStamp}>
-                            <Text style={styles.swipeStampTextNope}>PASS</Text>
-                        </View>
+                        <Text style={styles.swipeStampTextNope}>NOT TODAY</Text>
                     </Animated.View>
 
-                    {/* Spacer for top area */}
-                    <View style={{ flex: 1 }} />
-
-                    {/* Bottom gradient overlay with info */}
-                    <LinearGradient
-                        colors={['transparent', 'rgba(255,255,255,0.85)', 'rgba(255,255,255,0.98)']}
-                        style={styles.palCardBottomGradient}
-                    >
-                        {/* Name */}
-                        <Text style={styles.palName}>{pal.name}</Text>
-
-                        {/* Info chips */}
-                        <View style={styles.infoChipsContainer}>
-                            <View style={styles.infoChip}>
-                                <Text style={styles.infoChipIcon}>💭</Text>
-                                <Text style={styles.infoChipText}>{pal.feeling}</Text>
-                            </View>
-                            <View style={styles.infoChip}>
-                                <Text style={styles.infoChipIcon}>✨</Text>
-                                <Text style={styles.infoChipText}>{pal.hobbies}</Text>
-                            </View>
-                            <View style={styles.infoChip}>
-                                <Text style={styles.infoChipIcon}>💫</Text>
-                                <Text style={styles.infoChipText}>{pal.ideals}</Text>
-                            </View>
+                    {/* Bottom Metadata Content (55%) */}
+                    <View style={styles.cardContentNew}>
+                        {/* Header Row: Name & Age */}
+                        <View style={styles.cardHeaderRow}>
+                            <Text style={styles.cardNameSmall}>{pal.name}</Text>
+                            <Text style={styles.cardAge}>{(pal as any).age}</Text>
                         </View>
 
-                        {/* Action buttons */}
-                        <View style={styles.actionButtonsContainer}>
-                            <TouchableOpacity
-                                style={styles.rejectButton}
-                                onPress={handleButtonSwipeLeft}
-                                activeOpacity={0.8}
-                            >
-                                <X size={28} color={colors.textSecondary} />
-                            </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style={styles.acceptButton}
-                                onPress={handleButtonSwipeRight}
-                                activeOpacity={0.8}
-                            >
-                                <Heart size={28} color="#FFF" fill="#FFF" />
-                            </TouchableOpacity>
+                        <View style={{ flex: 1, justifyContent: 'center' }}>
+                            {(pal as any).feelings.length > 1 ? (
+                                <>
+                                    <View style={styles.feelingsRow}>
+                                        {(pal as any).feelings.map((f: any, i: number) => (
+                                            <Text key={i} style={styles.hugeFeelingTitleSmall}>{f.keyword}</Text>
+                                        ))}
+                                    </View>
+                                    <View style={styles.thinDivider} />
+                                    <View style={{ gap: 12 }}>
+                                        {(pal as any).feelings.map((f: any, i: number) => (
+                                            <Text key={i} style={styles.bioText}>{f.description}</Text>
+                                        ))}
+                                    </View>
+                                </>
+                            ) : (
+                                <>
+                                    <Text style={styles.hugeFeelingTitle}>{(pal as any).feelings[0].keyword}</Text>
+                                    <View style={styles.thinDivider} />
+                                    <Text style={styles.bioText}>{(pal as any).feelings[0].description}</Text>
+                                </>
+                            )}
                         </View>
-                    </LinearGradient>
-                </ImageBackground>
+
+                        {/* Bottom Tags */}
+                        <View style={styles.bottomTagsRow}>
+                            {pal.hobbies.split('•').map((tag, i) => (
+                                <View key={i} style={[styles.pillTag, { borderColor: cardAccent }]}>
+                                    <Text style={styles.pillTagText}>{tag.trim().toUpperCase()}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+
+                </View>
             </Animated.View>
         </GestureDetector>
     );
@@ -434,18 +497,17 @@ export default function PalScreen() {
                                 }
                             ]}
                         >
-                            <ImageBackground
-                                source={pal.avatar}
+                            <LinearGradient
+                                colors={(pal as any).gradient || ['#4c669f', '#3b5998', '#192f6a']}
                                 style={styles.palCardBackground}
-                                resizeMode="cover"
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
                             >
-                                <LinearGradient
-                                    colors={['transparent', 'rgba(255,255,255,0.85)', 'rgba(255,255,255,0.98)']}
-                                    style={styles.backgroundCardGradient}
-                                >
-                                    <Text style={styles.backgroundCardName}>{pal.name}</Text>
-                                </LinearGradient>
-                            </ImageBackground>
+                                <View style={styles.backgroundCardGradient}>
+                                    <Text style={styles.moodPreTitle}>CURRENTLY FEELING</Text>
+                                    <Text style={styles.moodTitle}>{(pal as any).feelings[0].keyword}</Text>
+                                </View>
+                            </LinearGradient>
                         </View>
                     );
                 }).reverse()}
@@ -481,8 +543,8 @@ export default function PalScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
             >
-                {/* Header */}
-                <View style={styles.header}>
+                {/* Header with higher zIndex to sit on top of cards */}
+                <View style={[styles.header, { zIndex: 20 }]}>
                     <View style={styles.headerContent}>
                         {/* Left side - View toggle button (icon only) */}
                         {activeTab !== 'circles' && (
@@ -541,12 +603,14 @@ export default function PalScreen() {
                     </View>
                 </View>
 
-                {/* Content */}
+                {/* Content - Cards stay behind */}
                 {renderCardContent()}
             </LinearGradient>
         </GestureHandlerRootView>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -603,9 +667,10 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
     // Cards Container
+    // Cards Container
     cardsContainer: {
-        flex: 1,
-        paddingBottom: TAB_BAR_HEIGHT,
+        ...StyleSheet.absoluteFillObject, // Full screen behind header
+        zIndex: 0,
     },
     // Card stack wrapper
     cardStackWrapper: {
@@ -616,10 +681,10 @@ const styles = StyleSheet.create({
     backgroundCard: {
         position: 'absolute',
         top: 0,
-        left: layout.spacing.md,
-        right: layout.spacing.md,
-        bottom: layout.spacing.md,
-        borderRadius: layout.borderRadius.xl,
+        left: 0, // No margin for full width
+        right: 0, // No margin for full width
+        bottom: 0, // No margin for full height
+        borderRadius: 0, // No rounded corners
         overflow: 'hidden',
         backgroundColor: colors.surface,
     },
@@ -639,10 +704,10 @@ const styles = StyleSheet.create({
     palCardContainer: {
         position: 'absolute',
         top: 0,
-        left: layout.spacing.md,
-        right: layout.spacing.md,
-        bottom: layout.spacing.md,
-        borderRadius: layout.borderRadius.xl,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 0, // No rounded corners
         overflow: 'hidden',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 8 },
@@ -781,35 +846,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 24,
+        gap: 40,
         marginTop: layout.spacing.md,
     },
     rejectButton: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#FFF',
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.3)',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 5,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
     },
     acceptButton: {
         width: 72,
         height: 72,
         borderRadius: 36,
-        backgroundColor: colors.accent,
+        backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: colors.accent,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
-        shadowRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 12,
         elevation: 8,
     },
     // No more cards state
@@ -993,6 +1053,201 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '900',
         color: colors.textPrimary,
+        letterSpacing: 1,
+    },
+    // Enhanced Swipe Card Styles
+    cardContentCentered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: layout.spacing.lg,
+    },
+    moodSection: {
+        width: '100%',
+        alignItems: 'center',
+        gap: 16,
+    },
+    feelingsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 32,
+        flexWrap: 'wrap',
+    },
+    feelingItem: {
+        alignItems: 'center',
+        gap: 4,
+    },
+    moodPreTitle: {
+        fontSize: typography.size.xs,
+        color: 'rgba(255,255,255,0.7)',
+        letterSpacing: 2,
+        marginBottom: layout.spacing.xs,
+        fontWeight: '700',
+    },
+    moodTitle: {
+        fontSize: 32, // Smaller for side-by-side
+        fontWeight: '300',
+        color: '#fff',
+        letterSpacing: 1,
+        textAlign: 'center',
+        fontStyle: 'italic',
+        lineHeight: 40,
+    },
+    spacer: {
+        width: 40,
+        height: 4,
+        backgroundColor: 'rgba(255,255,255,0.4)',
+        borderRadius: 2,
+        alignSelf: 'center',
+    },
+    miniSpacer: {
+        height: 20,
+    },
+    profileSection: {
+        alignItems: 'center',
+        gap: 8,
+    },
+    cardProfileName: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginBottom: 8,
+    },
+    cardTagsRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    cardTag: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.3)',
+    },
+    cardTagText: {
+        fontSize: typography.size.sm,
+        color: '#fff',
+        fontWeight: '600',
+    },
+    actionButtonLabel: {
+        fontSize: 10,
+        fontWeight: '700',
+        color: colors.textSecondary,
+        marginTop: 4,
+        textTransform: 'uppercase',
+    },
+    actionButtonLabelBig: {
+        fontSize: 16,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    moodSubtitle: {
+        fontSize: 14,
+        color: 'rgba(255,255,255,0.9)',
+        fontWeight: '500',
+        textAlign: 'center',
+        maxWidth: 120,
+    },
+    // --- NEW CARD DESIGN STYLES ---
+    cardImagePlaceholder: {
+        height: '45%',
+        width: '100%',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    cardImage: {
+        width: '100%',
+        height: '100%',
+    },
+    imagePlaceholderText: {
+        display: 'none', // Hide placeholder text
+    },
+    imageGradientOverlay: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 120, // Tall fade for seamless blend
+    },
+    cardContentNew: {
+        flex: 1,
+        paddingHorizontal: layout.spacing.xl,
+        paddingTop: 120, // Add padding for top header
+        paddingBottom: 100, // Add padding for bottom navbar
+        justifyContent: 'space-between',
+    },
+    cardHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    cardNameSmall: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: 'rgba(255,255,255,0.7)',
+        letterSpacing: 1.5,
+        textTransform: 'uppercase',
+    },
+    cardAge: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: 'rgba(255,255,255,0.7)',
+    },
+    hugeFeelingTitle: {
+        fontSize: 48,
+        fontWeight: '400',
+        color: '#FFF',
+        marginBottom: 16,
+    },
+    hugeFeelingTitleSmall: {
+        fontSize: 36,
+        fontWeight: '400',
+        color: '#FFF',
+    },
+    feelingsRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 16,
+        alignItems: 'baseline',
+        marginBottom: 16,
+    },
+    thinDivider: {
+        width: 40,
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.3)',
+        marginBottom: 24,
+    },
+    thinDividerSmall: {
+        width: 40,
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.3)',
+        marginBottom: 8,
+    },
+    bioText: {
+        fontSize: 18,
+        lineHeight: 28,
+        color: 'rgba(255,255,255,0.9)',
+        fontWeight: '400',
+    },
+    bottomTagsRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    pillTag: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.3)',
+    },
+    pillTagText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#FFF',
         letterSpacing: 1,
     },
 });

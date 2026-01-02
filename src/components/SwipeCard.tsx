@@ -1,4 +1,4 @@
-import { MapPin } from 'lucide-react-native';
+import { Clock, Handshake } from 'lucide-react-native';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -10,10 +10,8 @@ import Animated, {
     useSharedValue,
     withSpring,
 } from 'react-native-reanimated';
-import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
-import { Card } from './Card';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -27,6 +25,9 @@ interface TinderCardProps {
         bio: string;
         location: string;
         tags: string[];
+        feelings: { label: string; subtext: string }[];
+        color: string;
+        accent: string;
     };
     onSwipeLeft: () => void;
     onSwipeRight: () => void;
@@ -115,38 +116,61 @@ export const SwipeCard = forwardRef<SwipeCardRef, TinderCardProps>(({ item, onSw
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
             <GestureDetector gesture={gesture}>
                 <Animated.View style={[styles.cardContainer, animatedStyle]}>
-                    <Card style={styles.card}>
+                    <View style={[styles.card, { backgroundColor: item.color }]}>
+                        {/* Swipable Stamps */}
                         <Animated.View style={[styles.stamp, styles.likeStamp, likeStyle]}>
-                            <Text style={styles.likeText}>REQUEST</Text>
+                            <Text style={styles.likeText}>Feeling Same</Text>
                         </Animated.View>
                         <Animated.View style={[styles.stamp, styles.nopeStamp, nopeStyle]}>
-                            <Text style={styles.nopeText}>LATER</Text>
+                            <Text style={styles.nopeText}>Not Today</Text>
                         </Animated.View>
 
                         <View style={styles.content}>
-                            <View style={styles.header}>
-                                <Text style={styles.name}>{item.name}, {item.age}</Text>
-                                <Text style={styles.role}>{item.role}</Text>
+                            {/* Header: Name moved to top */}
+                            <View style={styles.headerSection}>
+                                <Text style={styles.name}>{item.name}</Text>
+                                <Text style={styles.subHeaderText}>{item.age} • {item.role}</Text>
                             </View>
 
-                            <View style={styles.row}>
-                                <MapPin size={16} color={colors.textSecondary} />
-                                <Text style={styles.detailText}>{item.location}</Text>
+                            {/* Divider / Spacer */}
+                            <View style={styles.spacer} />
+
+                            {/* Center: Feelings Side by Side */}
+                            <View style={styles.moodSection}>
+                                <Text style={styles.moodLabel}>CURRENTLY FEELING</Text>
+                                <View style={styles.feelingsContainer}>
+                                    {item.feelings.map((feeling, index) => (
+                                        <View key={index} style={styles.feelingItem}>
+                                            <Text style={styles.feelingLabel}>{feeling.label}</Text>
+                                            <Text style={styles.feelingSubtext}>{feeling.subtext}</Text>
+                                        </View>
+                                    ))}
+                                </View>
                             </View>
 
+                            {/* Spacer */}
+                            <View style={styles.miniSpacer} />
+
+                            {/* Tags */}
                             <View style={styles.tags}>
-                                {item.tags.map((tag, i) => (
+                                {item.tags.slice(0, 2).map((tag, i) => (
                                     <View key={i} style={styles.tag}>
                                         <Text style={styles.tagText}>{tag}</Text>
                                     </View>
                                 ))}
                             </View>
 
-                            <View style={styles.divider} />
-
-                            <Text style={styles.bio}>{item.bio}</Text>
+                            {/* Footer Actions / Info */}
+                            <View style={styles.footerRow}>
+                                <View style={styles.iconButton}>
+                                    <Clock size={24} color="#FFF" />
+                                </View>
+                                <View style={[styles.iconButton, { backgroundColor: '#FFF' }]}>
+                                    <Handshake size={24} color={item.color} />
+                                </View>
+                            </View>
                         </View>
-                    </Card>
+                    </View>
                 </Animated.View>
             </GestureDetector>
         </View>
@@ -156,7 +180,7 @@ export const SwipeCard = forwardRef<SwipeCardRef, TinderCardProps>(({ item, onSw
 const styles = StyleSheet.create({
     cardContainer: {
         width: '100%',
-        height: SCREEN_HEIGHT * 0.55,
+        height: SCREEN_HEIGHT * 0.65, // Slightly taller
         justifyContent: 'center',
         alignItems: 'center',
         padding: layout.spacing.lg,
@@ -165,91 +189,153 @@ const styles = StyleSheet.create({
     card: {
         width: '100%',
         flex: 1,
+        borderRadius: 32,
+        padding: layout.spacing.xl,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 12,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 24,
+        elevation: 12,
+        alignItems: 'center',
     },
     content: {
         flex: 1,
-        gap: layout.spacing.md,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: layout.spacing.md,
     },
-    header: {
-        marginBottom: layout.spacing.xs,
+    headerSection: {
+        alignItems: 'center',
+        marginTop: layout.spacing.sm,
+        gap: 4,
     },
     name: {
-        fontSize: typography.size.xxl,
-        fontWeight: typography.weight.bold as any,
-        color: colors.textPrimary,
+        fontSize: 36, // Larger name
+        fontWeight: 'bold',
+        color: '#fff',
+        textAlign: 'center',
     },
-    role: {
-        fontSize: typography.size.md,
-        fontWeight: typography.weight.medium as any,
-        color: colors.accent,
+    subHeaderText: {
+        fontSize: 16,
+        color: 'rgba(255,255,255,0.8)',
+        fontWeight: '500',
     },
-    row: {
-        flexDirection: 'row',
+    moodSection: {
+        width: '100%',
         alignItems: 'center',
-        gap: 6,
+        gap: 16,
     },
-    detailText: {
-        fontSize: typography.size.sm,
-        color: colors.textSecondary,
+    moodLabel: {
+        fontSize: typography.size.xs,
+        color: 'rgba(255,255,255,0.7)',
+        letterSpacing: 2.5,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+    },
+    feelingsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 32,
+        flexWrap: 'wrap',
+    },
+    feelingItem: {
+        alignItems: 'center',
+        gap: 4,
+    },
+    feelingLabel: {
+        fontSize: 32, // Reduced for side-by-side
+        fontWeight: '300',
+        color: '#fff',
+        fontStyle: 'italic',
+        lineHeight: 40,
+        textAlign: 'center',
+    },
+    feelingSubtext: {
+        fontSize: 14,
+        color: 'rgba(255,255,255,0.9)',
+        fontWeight: '500',
+        textAlign: 'center',
+        maxWidth: 120, // Prevent wide text from breaking layout
     },
     tags: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        justifyContent: 'center',
         gap: 8,
     },
     tag: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        backgroundColor: colors.glassOverlay,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 24,
+        backgroundColor: 'rgba(255,255,255,0.15)',
         borderWidth: 1,
-        borderColor: colors.glassBorder,
+        borderColor: 'rgba(255,255,255,0.2)',
     },
     tagText: {
-        fontSize: typography.size.xs,
-        color: colors.textSecondary,
-        fontWeight: typography.weight.medium as any,
+        fontSize: typography.size.sm,
+        color: '#fff',
+        fontWeight: '600',
     },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderDark,
-        opacity: 0.5,
-        marginVertical: layout.spacing.sm,
+    spacer: {
+        width: 40,
+        height: 4,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: 2,
+        alignSelf: 'center',
     },
-    bio: {
-        fontSize: typography.size.md,
-        color: colors.textSecondary,
-        lineHeight: 22,
+    miniSpacer: {
+        height: 20,
+    },
+    footerRow: {
+        flexDirection: 'row',
+        gap: 40,
+        marginTop: 30,
+        alignItems: 'center',
+    },
+    iconButton: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: 'rgba(255,255,255,0.15)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.2)',
     },
     stamp: {
         position: 'absolute',
-        top: 30,
+        top: 50,
         zIndex: 100,
-        borderWidth: 3,
-        borderRadius: 8,
-        padding: 10,
-        backgroundColor: colors.glass,
+        borderWidth: 4,
+        borderRadius: 12,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: 'rgba(0,0,0,0.2)', // Semi-transparent background for contrast
     },
     likeStamp: {
-        right: 20,
-        borderColor: colors.success,
+        right: 40,
+        borderColor: '#4ADE80',
         transform: [{ rotate: '-15deg' }],
     },
     nopeStamp: {
-        left: 20,
-        borderColor: colors.error,
+        left: 40,
+        borderColor: '#EF4444',
         transform: [{ rotate: '15deg' }],
     },
     likeText: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: colors.success,
-        letterSpacing: 2,
+        fontSize: 24,
+        fontWeight: '900',
+        color: '#4ADE80',
+        textTransform: 'uppercase',
     },
     nopeText: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: colors.error,
-        letterSpacing: 2,
+        fontSize: 24,
+        fontWeight: '900',
+        color: '#EF4444',
+        textTransform: 'uppercase',
     },
 });

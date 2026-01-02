@@ -1,14 +1,14 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
-import { X, Check } from 'lucide-react-native';
+import { Check, X } from 'lucide-react-native';
+import React, { useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ProfileButton } from '../components/ProfileButton';
 import { Screen } from '../components/Screen';
 import { SwipeCard, SwipeCardRef } from '../components/SwipeCard';
-import { ProfileButton } from '../components/ProfileButton';
+import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 import { typography } from '../theme/typography';
-import { colors } from '../theme/colors';
 
 const BUDDY_ROLES = [
     'Software Engineer', 'Product Designer', 'Marketing Specialist', 'Data Analyst',
@@ -32,25 +32,86 @@ const MENTOR_NAMES = [
     'Joseph', 'Margaret', 'Christopher', 'Sandra'
 ];
 
-const INITIAL_BUDDIES = Array.from({ length: 20 }).map((_, i) => ({
-    id: `b${i + 1}`,
-    name: BUDDY_NAMES[i % BUDDY_NAMES.length],
-    age: 22 + (i % 8),
-    role: BUDDY_ROLES[i % BUDDY_ROLES.length],
-    location: i % 3 === 0 ? 'New York, USA' : i % 3 === 1 ? 'London, UK' : 'Remote',
-    tags: ['Early Career', 'Tech', 'Growth'],
-    bio: `Passionate ${BUDDY_ROLES[i % BUDDY_ROLES.length]} looking to connect and grow together.`
-}));
+const MOODS = [
+    {
+        id: 'lost',
+        feelings: [
+            { label: 'Lost', subtext: "Don't know which way to go" },
+            { label: 'Stuck', subtext: "I feel stuck" }
+        ],
+        type: 'negative',
+        color: '#2F5266', // Deep Teal
+        accent: '#5C8D9E'
+    },
+    {
+        id: 'hopeful',
+        feelings: [
+            { label: 'Hopeful', subtext: "Seeing a bright future" },
+            { label: 'Inspired', subtext: "Ready to create" }
+        ],
+        type: 'positive',
+        color: '#D6B07C', // Warm Gold (from palette)
+        accent: '#EED9B8'
+    },
+    {
+        id: 'lonely',
+        feelings: [
+            { label: 'Lonely', subtext: "Need someone to talk to" },
+            { label: 'Quiet', subtext: "Too much silence" }
+        ],
+        type: 'negative',
+        color: '#5D5C8D', // Muted Purple
+        accent: '#8E8DB6'
+    },
+    {
+        id: 'anxious',
+        feelings: [
+            { label: 'Anxious', subtext: "Heart beating fast" },
+            { label: 'Worried', subtext: "About everything" }
+        ],
+        type: 'negative',
+        color: '#9E5A5A', // Muted Red
+        accent: '#D18C8C'
+    },
+    {
+        id: 'calm',
+        feelings: [
+            { label: 'Calm', subtext: "Peaceful mind" },
+            { label: 'Steady', subtext: "In control" }
+        ],
+        type: 'positive',
+        color: '#3EC5A7', // Palette Green
+        accent: '#84DCC8'
+    },
+];
 
-const INITIAL_MENTORS = Array.from({ length: 20 }).map((_, i) => ({
-    id: `m${i + 1}`,
-    name: MENTOR_NAMES[i % MENTOR_NAMES.length],
-    age: 35 + (i % 15),
-    role: MENTOR_ROLES[i % MENTOR_ROLES.length],
-    location: i % 3 === 0 ? 'San Francisco, CA' : i % 3 === 1 ? 'Berlin, DE' : 'Remote',
-    tags: ['Leadership', 'Strategy', 'Career'],
-    bio: `Experienced ${MENTOR_ROLES[i % MENTOR_ROLES.length]} ready to help you navigate your career path.`
-}));
+const INITIAL_BUDDIES = Array.from({ length: 20 }).map((_, i) => {
+    const { id: moodId, ...moodProps } = MOODS[i % MOODS.length];
+    return {
+        id: `b${i + 1}`,
+        name: BUDDY_NAMES[i % BUDDY_NAMES.length],
+        age: 22 + (i % 8),
+        role: BUDDY_ROLES[i % BUDDY_ROLES.length],
+        location: i % 3 === 0 ? 'New York, USA' : i % 3 === 1 ? 'London, UK' : 'Remote',
+        tags: ['Hiking', 'Photography', 'Art'],
+        bio: `Passionate ${BUDDY_ROLES[i % BUDDY_ROLES.length]} looking to connect.`,
+        ...moodProps,
+    };
+});
+
+const INITIAL_MENTORS = Array.from({ length: 20 }).map((_, i) => {
+    const { id: moodId, ...moodProps } = MOODS[(i + 2) % MOODS.length];
+    return {
+        id: `m${i + 1}`,
+        name: MENTOR_NAMES[i % MENTOR_NAMES.length],
+        age: 35 + (i % 15),
+        role: MENTOR_ROLES[i % MENTOR_ROLES.length],
+        location: i % 3 === 0 ? 'San Francisco, CA' : i % 3 === 1 ? 'Berlin, DE' : 'Remote',
+        tags: ['Leadership', 'Strategy', 'Career'],
+        bio: `Experienced ${MENTOR_ROLES[i % MENTOR_ROLES.length]} ready to help.`,
+        ...moodProps,
+    };
+});
 
 const MESSAGES = [
     { id: '1', name: 'James', message: 'Hey! Did you finish the task?', time: '2m' },
@@ -76,7 +137,7 @@ export function BuddyScreen() {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Screen>
                 {/* Top Toggle Bar */}
-                <View style={styles.header}>
+                <View style={[styles.header, { backgroundColor: currentStack[0]?.color ? `${currentStack[0].color}1A` : 'transparent' }]}>
                     <View style={styles.headerContent}>
                         <View style={{ width: 40 }} />
                         <View style={styles.toggleContainer}>
@@ -98,7 +159,7 @@ export function BuddyScreen() {
                 </View>
 
                 {/* Swipe Stack */}
-                <View style={styles.stackContainer}>
+                <View style={[styles.stackContainer, { backgroundColor: currentStack[0]?.color ? `${currentStack[0].color}1A` : 'transparent' }]}>
                     {currentStack.length > 0 ? (
                         currentStack
                             .map((item, index) => {
