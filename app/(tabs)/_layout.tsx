@@ -62,6 +62,15 @@ export default function TabLayout() {
                     drawable="ic_trophy"
                 />
             </NativeTabs.Trigger>
+
+            {/* Profile Tab - using person.crop.circle SF Symbol */}
+            <NativeTabs.Trigger name="profile">
+                <Label>Profile</Label>
+                <Icon
+                    sf={{ default: 'person.crop.circle', selected: 'person.crop.circle.fill' }}
+                    drawable="ic_person"
+                />
+            </NativeTabs.Trigger>
         </NativeTabs>
     );
 }

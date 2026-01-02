@@ -14,7 +14,6 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
-import { ProfileButton } from '../../src/components/ProfileButton';
 import { colors } from '../../src/theme/colors';
 import { layout } from '../../src/theme/layout';
 import { typography } from '../../src/theme/typography';
@@ -537,8 +536,8 @@ export default function PalScreen() {
                             </TouchableOpacity>
                         </BlurView>
 
-                        {/* Right side - Profile button */}
-                        <ProfileButton />
+                        {/* Right side - Profile button removed */}
+                        <View style={{ width: 44 }} />
                     </View>
                 </View>
 

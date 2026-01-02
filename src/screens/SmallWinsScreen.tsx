@@ -3,7 +3,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowUpRight, Award, CheckCircle2, Medal, Plus, Star, TrendingUp, Trophy, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { ProfileButton } from '../components/ProfileButton';
 import { colors } from '../theme/colors';
 import { layout } from '../theme/layout';
 
@@ -58,7 +57,7 @@ export function SmallWinsScreen() {
                         <Text style={styles.headerSubtitle}>MILESTONES /</Text>
                         <Text style={styles.headerTitle}>SMALL WINS</Text>
                     </View>
-                    <ProfileButton />
+                    {/* Profile Button removed */}
                 </View>
 
                 <View style={styles.divider} />

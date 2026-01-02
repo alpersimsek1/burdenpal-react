@@ -1,210 +1,262 @@
+// User Profile Screen - Industrial Minimalist Design
+import { LinearGradient } from 'expo-linear-gradient';
+import { Bell, ChevronRight, LogOut, Settings, Shield, User, Wallet } from 'lucide-react-native';
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
-import { Settings, LogOut, ChevronRight, User, Mail, Bell, Shield } from 'lucide-react-native';
-import { Screen } from '../components/Screen';
-import { Card } from '../components/Card';
-import { layout } from '../theme/layout';
-import { typography } from '../theme/typography';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors } from '../theme/colors';
+import { layout } from '../theme/layout';
+
+const TAB_BAR_HEIGHT = 100;
 
 export function UserProfileScreen() {
     const MENU_ITEMS = [
-        { icon: User, label: 'Personal Information' },
-        { icon: Bell, label: 'Notifications' },
-        { icon: Shield, label: 'Privacy & Security' },
-        { icon: Settings, label: 'App Settings' },
+        { icon: User, label: 'PERSONAL INFORMATION', value: '' },
+        { icon: Bell, label: 'NOTIFICATIONS', value: 'ON' },
+        { icon: Shield, label: 'PRIVACY & SECURITY', value: '' },
+        { icon: Wallet, label: 'SUBSCRIPTION', value: 'PREMIUM' },
+        { icon: Settings, label: 'APP SETTINGS', value: '' },
     ];
 
     return (
-        <Screen>
-            <ScrollView contentContainerStyle={styles.content}>
-                {/* Profile Header */}
-                <View style={styles.header}>
-                    <View style={styles.avatarContainer}>
-                        <Text style={styles.avatarText}>ME</Text>
-                    </View>
-                    <Text style={styles.name}>Alex Johnson</Text>
-                    <Text style={styles.email}>alex.johnson@example.com</Text>
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>Premium Member</Text>
-                    </View>
-                </View>
-
-                {/* Stats Row */}
-                <View style={styles.statsRow}>
-                    <Card style={styles.statCard}>
-                        <Text style={styles.statNumber}>12</Text>
-                        <Text style={styles.statLabel}>Wins</Text>
-                    </Card>
-                    <Card style={styles.statCard}>
-                        <Text style={styles.statNumber}>5</Text>
-                        <Text style={styles.statLabel}>Buddies</Text>
-                    </Card>
-                    <Card style={styles.statCard}>
-                        <Text style={styles.statNumber}>8</Text>
-                        <Text style={styles.statLabel}>Streak</Text>
-                    </Card>
-                </View>
-
-                {/* Menu */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Account</Text>
-                    <Card style={styles.menuCard}>
-                        {MENU_ITEMS.map((item, index) => (
-                            <TouchableOpacity key={index} style={styles.menuItem}>
-                                <View style={styles.menuItemLeft}>
-                                    <View style={styles.iconContainer}>
-                                        <item.icon size={20} color={colors.primary} />
-                                    </View>
-                                    <Text style={styles.menuLabel}>{item.label}</Text>
+        <View style={styles.container}>
+            <ScrollView
+                contentContainerStyle={styles.content}
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+            >
+                {/* Immersive Profile Hero Gradient */}
+                <LinearGradient
+                    colors={[colors.moodReflection, colors.background]}
+                    style={styles.profileHero}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                >
+                    <SafeAreaView>
+                        <View style={styles.profileContent}>
+                            <View style={styles.avatarBox}>
+                                <Text style={styles.avatarText}>AJ</Text>
+                            </View>
+                            <View style={styles.profileInfo}>
+                                <Text style={styles.name}>ALEX JOHNSON</Text>
+                                <Text style={styles.email}>ALEX.JOHNSON@EXAMPLE.COM</Text>
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>PREMIUM MEMBER</Text>
                                 </View>
-                                <ChevronRight size={20} color={colors.textSecondary} />
-                            </TouchableOpacity>
-                        ))}
-                    </Card>
+                            </View>
+                        </View>
+                    </SafeAreaView>
+                </LinearGradient>
+
+                {/* Stats Row - Industrial Boxes */}
+                <View style={styles.statsRow}>
+                    <View style={styles.statBox}>
+                        <Text style={styles.statNumber}>12</Text>
+                        <Text style={styles.statLabel}>WINS</Text>
+                    </View>
+                    <View style={styles.statBoxMiddle}>
+                        <Text style={styles.statNumber}>05</Text>
+                        <Text style={styles.statLabel}>BUDDIES</Text>
+                    </View>
+                    <View style={styles.statBox}>
+                        <Text style={styles.statNumber}>08</Text>
+                        <Text style={styles.statLabel}>STREAK</Text>
+                    </View>
                 </View>
 
-                {/* Logout Button */}
+                <View style={styles.sectionDivider} />
+
+                {/* Menu List */}
+                <View style={styles.menuList}>
+                    <Text style={styles.menuHeader}>SETTINGS</Text>
+                    {MENU_ITEMS.map((item, index) => (
+                        <TouchableOpacity key={index} style={styles.menuItem} activeOpacity={0.7}>
+                            <View style={styles.menuItemLeft}>
+                                <item.icon size={20} color={colors.textPrimary} />
+                                <Text style={styles.menuLabel}>{item.label}</Text>
+                            </View>
+                            <View style={styles.menuItemRight}>
+                                {item.value ? <Text style={styles.menuValue}>{item.value}</Text> : null}
+                                <ChevronRight size={16} color={colors.textSecondary} />
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                {/* Logout */}
                 <TouchableOpacity style={styles.logoutButton}>
-                    <LogOut size={20} color="#EF4444" />
-                    <Text style={styles.logoutText}>Log Out</Text>
+                    <LogOut size={20} color={colors.error} />
+                    <Text style={styles.logoutText}>LOG OUT</Text>
                 </TouchableOpacity>
 
             </ScrollView>
-        </Screen>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
     content: {
-        padding: layout.spacing.lg,
+        paddingBottom: TAB_BAR_HEIGHT + 20,
+    },
+    // Profile Hero
+    profileHero: {
+        paddingTop: 20,
         paddingBottom: 40,
+        marginBottom: 20,
     },
-    header: {
+    profileContent: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: layout.spacing.xl,
-        marginTop: layout.spacing.lg,
+        paddingHorizontal: layout.spacing.xl,
+        paddingTop: 40, // Extra top space for status bar
+        gap: 20,
     },
-    avatarContainer: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        backgroundColor: colors.primary,
+    avatarBox: {
+        width: 80,
+        height: 80,
+        backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: layout.spacing.md,
-        borderWidth: 4,
-        borderColor: colors.surface,
-        elevation: 4,
-        shadowColor: colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
+        borderWidth: 2,
+        borderColor: colors.textPrimary,
     },
     avatarText: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#FFF',
+        fontSize: 24,
+        fontWeight: '900',
+        color: colors.textPrimary,
+        letterSpacing: 1,
+    },
+    profileInfo: {
+        flex: 1,
+        gap: 4,
     },
     name: {
-        fontSize: typography.size.xl,
-        fontWeight: typography.weight.bold as any,
+        fontSize: 20,
+        fontWeight: '800',
         color: colors.textPrimary,
-        marginBottom: 4,
+        letterSpacing: -0.5,
     },
     email: {
-        fontSize: typography.size.sm,
+        fontSize: 12,
+        fontFamily: 'Courier',
         color: colors.textSecondary,
-        marginBottom: layout.spacing.md,
+        marginBottom: 8,
     },
     badge: {
-        backgroundColor: colors.primary + '15',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.primary + '30',
+        backgroundColor: colors.accent,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        alignSelf: 'flex-start',
     },
     badgeText: {
         fontSize: 10,
         fontWeight: 'bold',
-        color: colors.primary,
-        textTransform: 'uppercase',
-        letterSpacing: 1,
+        color: '#FFF',
+        letterSpacing: 0.5,
     },
+    // Stats
     statsRow: {
         flexDirection: 'row',
-        gap: layout.spacing.md,
+        paddingHorizontal: layout.spacing.xl,
         marginBottom: layout.spacing.xl,
     },
-    statCard: {
+    statBox: {
         flex: 1,
+        paddingVertical: 16,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: colors.borderDark,
         alignItems: 'center',
-        padding: layout.spacing.md,
+        gap: 4,
+    },
+    statBoxMiddle: {
+        flex: 1,
+        paddingVertical: 16,
+        paddingHorizontal: 12,
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: colors.borderDark,
+        alignItems: 'center',
+        gap: 4,
     },
     statNumber: {
-        fontSize: typography.size.xl,
-        fontWeight: 'bold',
+        fontSize: 24,
+        fontWeight: '900',
         color: colors.textPrimary,
-        marginBottom: 4,
     },
     statLabel: {
-        fontSize: typography.size.xs,
+        fontSize: 10,
+        fontWeight: 'bold',
         color: colors.textSecondary,
-        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
-    section: {
+    sectionDivider: {
+        height: 1,
+        backgroundColor: colors.borderDark,
+        marginHorizontal: layout.spacing.lg,
+        marginBottom: layout.spacing.lg,
+    },
+    // Menu
+    menuList: {
+        paddingHorizontal: layout.spacing.xl,
         marginBottom: layout.spacing.xl,
     },
-    sectionTitle: {
-        fontSize: typography.size.lg,
+    menuHeader: {
+        fontSize: 12,
         fontWeight: 'bold',
-        color: colors.textPrimary,
-        marginBottom: layout.spacing.md,
-    },
-    menuCard: {
-        padding: 0,
-        overflow: 'hidden',
+        color: colors.textSecondary,
+        letterSpacing: 1,
+        marginBottom: 16,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: layout.spacing.md,
+        paddingVertical: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderDark,
     },
     menuItemLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
-    },
-    iconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        backgroundColor: colors.primary + '10',
-        justifyContent: 'center',
-        alignItems: 'center',
+        gap: 16,
     },
     menuLabel: {
-        fontSize: typography.size.md,
+        fontSize: 14,
+        fontWeight: 'bold',
         color: colors.textPrimary,
+        letterSpacing: 0.5,
     },
-    logoutButton: {
+    menuItemRight: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
         gap: 8,
-        padding: layout.spacing.md,
-        borderRadius: layout.borderRadius.lg,
-        backgroundColor: '#EF4444' + '10',
+    },
+    menuValue: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.accent,
+        letterSpacing: 0.5,
+    },
+    // Logout
+    logoutButton: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 10,
+        marginHorizontal: layout.spacing.xl,
+        paddingVertical: 18,
         borderWidth: 1,
-        borderColor: '#EF4444' + '30',
+        borderColor: colors.error,
+        marginTop: 20,
     },
     logoutText: {
-        fontSize: typography.size.md,
+        fontSize: 14,
         fontWeight: 'bold',
-        color: '#EF4444',
+        color: colors.error,
+        letterSpacing: 1,
     },
 });

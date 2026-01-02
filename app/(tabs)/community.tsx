@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { ArrowUpRight, Plus, Users } from 'lucide-react-native';
 import React from 'react';
 import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ProfileButton } from '../../src/components/ProfileButton';
 import { COMMUNITIES, POSTS } from '../../src/data/communityData';
 import { colors } from '../../src/theme/colors';
 import { layout } from '../../src/theme/layout';
@@ -51,9 +50,10 @@ export default function SpacesTab() {
             />
 
             <SafeAreaView style={styles.safeArea}>
+                {/* Industrial Header */}
                 <View style={styles.header}>
-                    <Text style={styles.pageTitle}>SPACES</Text>
-                    <ProfileButton />
+                    <Text style={styles.headerTitle}>SPACES</Text>
+                    {/* Profile Button removed */}
                 </View>
 
                 <ScrollView
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         paddingTop: layout.spacing.lg,
         paddingBottom: layout.spacing.lg,
     },
-    pageTitle: {
+    headerTitle: {
         fontSize: 32,
         fontWeight: '900', // Heavy industrial font
         color: colors.textPrimary,
